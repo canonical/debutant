@@ -79,6 +79,23 @@ changes. Flags:
   is always advisory).
 - `--yes` — skip the confirmation gate before writing.
 
+## Language-aware audit
+
+When `source.language` matches a language with a dedicated overlay,
+the audit phase adds language-specific checks on top of the
+flag-driven ones above. These checks surface in the audit report
+(Process step 1) and only trigger writes when the maintainer
+enables the relevant generic flag (`--watch-v5`, `--dh-sequence`,
+etc.) — they do not introduce new flags.
+
+- **Python**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` lands.
+- **Rust**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` lands.
+- **Go**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` lands.
+- **Perl**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` lands.
+
+When `source.language` is not in this list, no language-aware
+checks fire and the audit is purely flag-driven.
+
 ## Process
 
 1. **Audit phase** (always runs). Read the existing `debian/`
