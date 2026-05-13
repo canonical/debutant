@@ -46,26 +46,79 @@ debutant/
 
 ## Install
 
-### Local development
+Claude Code plugins always install through a "marketplace" — but a
+marketplace can be a local directory or a private git repo. Pick
+the path that matches your situation.
 
-From a checkout of this repo:
+### Per-session (dev / workshop)
+
+Load the plugin from a checkout for the current Claude Code
+session only. No marketplace needed:
 
 ```
 claude --plugin-dir /path/to/debutant
 ```
 
-That loads the plugin for the current session. Changes are picked
-up with `/reload-plugins`.
+Inside Claude Code, `/reload-plugins` picks up edits without
+restart. This is what `workshop.yaml`'s `claude` action does.
 
-### From a marketplace
+### Persistent on one laptop
 
-When debutant ships via a Claude Code plugin marketplace:
+Create a one-plugin marketplace under `~/.local/share/` (or
+wherever you like), then install from it:
 
 ```
-/plugin install debutant@<marketplace>
+mkdir -p ~/.local/share/claude-marketplaces/local/.claude-plugin
+
+cat > ~/.local/share/claude-marketplaces/local/.claude-plugin/marketplace.json <<EOF
+{
+  "name": "local",
+  "owner": { "name": "$(git config user.name)" },
+  "plugins": [
+    { "name": "debutant", "source": "/path/to/debutant" }
+  ]
+}
+EOF
 ```
 
-(Marketplace name TBD before first release.)
+Then in Claude Code:
+
+```
+/plugin marketplace add ~/.local/share/claude-marketplaces/local
+/plugin install debutant@local
+```
+
+`/debutant:run` and friends are now available from any project.
+`/plugin update debutant@local` re-fetches after you pull new
+commits.
+
+If the install complains about an absolute `source`, fall back to
+a symlink: put the marketplace at the same level as a symlink to
+the plugin checkout, and set `source` to `"./debutant"` (relative).
+
+### Team-shared (private git marketplace)
+
+Push the marketplace JSON above to a private git repo. The plugin
+`source` becomes the plugin's own git URL. Teammates run:
+
+```
+/plugin marketplace add <org>/<marketplace-repo>
+/plugin install debutant@<marketplace-name>
+```
+
+For projects that should auto-load debutant on first open, add
+this to the project's `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "<marketplace-name>": {
+      "source": { "source": "github", "repo": "<org>/<marketplace-repo>" }
+    }
+  },
+  "enabledPlugins": { "debutant@<marketplace-name>": true }
+}
+```
 
 ## Invocation
 
