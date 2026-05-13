@@ -50,7 +50,7 @@ A minimal but complete `debian/` directory with:
   For git-only upstreams, use `mode=git`.
 - `debian/salsa-ci.yml` — include the pinned template version from
   `${CLAUDE_PLUGIN_ROOT}/docs/references/salsa-ci.md`.
-- `debian/gbp.conf` — DEP-14 layout (`debian-branch = debian/latest`,
+- `debian/gbp.conf` — DEP-14 layout (`debian-branch = debian/unstable`,
   `upstream-branch = upstream/latest`, `pristine-tar = True` if the
   package will use it).
 
@@ -134,6 +134,12 @@ and a wrong default ripples into every later run.
    envelope"). If neither builder is available, report and stop —
    the maintainer must set up a build environment before bootstrap
    verification can complete.
+   If the verify failure is an upstream source issue and a patch is
+   the right fix, follow the patches workflow in
+   `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md` § "Patches" — author
+   via `gbp pq`, never write to `debian/patches/` directly. Patch
+   authoring at bootstrap time is rare; prefer bailing to the
+   maintainer over guessing a patch.
 8. **Report.** Print:
    - Files created.
    - First build result.

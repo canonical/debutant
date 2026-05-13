@@ -4,7 +4,7 @@
 
 Authoritative branch names:
 
-- `debian/latest` — current packaging work targeting unstable.
+- `debian/unstable` — current packaging work targeting unstable.
   Default branch for new packages.
 - `debian/<release>` (e.g. `debian/bookworm`) — release-specific
   branches for stable updates / backports.
@@ -30,7 +30,7 @@ Config in `debian/gbp.conf`:
 
 ```ini
 [DEFAULT]
-debian-branch = debian/latest
+debian-branch = debian/unstable
 upstream-branch = upstream/latest
 pristine-tar = True
 sign-tags = True

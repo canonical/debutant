@@ -136,6 +136,42 @@ maintainer can override the active style by passing
 
 ## Patches
 
+Debutant assumes a `git-buildpackage` / DEP-14 workflow throughout.
+Workers operating on a package that is **not** packaged with `gbp`
+(no `debian/gbp.conf`, no DEP-14 branch layout) MUST bail to the
+maintainer with a clear message rather than try to translate the
+quilt-only workflow on the fly.
+
+- **All patches are authored via `git-buildpackage`'s patch
+  queue.** **DD-judgement** — uniform workflow, integrates with
+  DEP-14.
+- **Use `gbp pq import` to create the `patch-queue/<current-branch>`
+  branch** — e.g. `patch-queue/debian/unstable` when on
+  `debian/unstable`. If that branch already exists, ask the
+  maintainer to choose: (a) reuse it as-is, (b) drop it and
+  reimport from `debian/patches/`, or (c) inspect for un-exported
+  work before deciding. **DD-judgement.**
+- **Author new patches as commits on `patch-queue/<branch>`.** One
+  logical change per commit; the commit message becomes the
+  patch's DEP-3 `Description:` and `Author:` headers. `gbp pq
+  export` materialises each commit as one `.patch` file under
+  `debian/patches/`. Never edit `debian/patches/*.patch` by hand.
+  **DD-judgement.**
+- **Review the diff produced by `gbp pq export` before committing
+  the packaging branch** — confirm `debian/patches/series` and the
+  generated `.patch` files match your intent.
+  **DD-judgement.**
+- **New upstream tarball import sequence**:
+  - Ensure `patch-queue/<branch>` is current. On a clean packaging branch, run
+    `gbp pq import` to create the `patch-queue/<branch>`, then `gbp pq switch`
+    to come back to the packaging branch. If the import fails, hand the control
+    to the maintainer.
+  - Run `gbp import-orig --pristine-tar` to bring the new
+    upstream in.
+  - Run `gbp pq rebase` to re-anchor patches on the new upstream.
+    Conflicts here are maintainer territory — the worker MUST
+    surface them and stop.
+  **DD-judgement.**
 - All upstream modifications via `debian/patches/` with DEP-3
   headers (`Origin:`, `Forwarded:`, `Last-Update:`, `Author:`,
   `Description:`). **DEP-3.**
@@ -160,7 +196,7 @@ maintainer can override the active style by passing
 
 ## VCS layout
 
-- DEP-14: `debian/latest` for development, `pristine-tar` branch
+- DEP-14: `debian/unstable` for development, `pristine-tar` branch
   for tarballs when used, `upstream/latest` for upstream imports.
   **DEP-14.**
 - Workers MUST detect existing layout and not assume `master` is
@@ -246,3 +282,4 @@ top of the Debian-first rules above. See
   downstream house-style file passed via `--house-style=<path>`.
   Workers MUST then cite "house-style (custom)" rather than
   "DD-judgement".
+

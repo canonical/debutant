@@ -59,7 +59,7 @@ https://wiki.debian.org/UpstreamMetadata
 
 ## DEP-14 — Recommended git branch layout
 
-- `debian/latest` (or `debian/<distribution>` for release branches).
+- `debian/unstable` (or `debian/<distribution>` for release branches).
 - `upstream/latest` for upstream imports.
 - `pristine-tar` for tarball reconstruction.
 - Tags: `debian/<version>` (signed when possible).

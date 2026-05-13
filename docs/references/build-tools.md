@@ -31,7 +31,7 @@ worker enters the verification loop.
 Wraps `sbuild` (or `pbuilder`, or `dpkg-buildpackage`) with
 git-buildpackage's DEP-14 awareness.
 
-- Builds from `debian/latest` (or whatever `debian-branch =` says
+- Builds from `debian/unstable` (or whatever `debian-branch =` says
   in `debian/gbp.conf`).
 - Imports orig tarball from `pristine-tar` if configured.
 - Signs git tags after a successful release build.

@@ -26,7 +26,7 @@ For every tag lintian emits, classify it into exactly one bucket:
 | Bucket | Use when | How to fix |
 |---|---|---|
 | **fix in packaging** | Tag is fixable by a change in `debian/` | Smallest patch that resolves the tag without side effects. |
-| **fix upstream via patch** | Tag points to an upstream source issue | DEP-3 quilt patch under `debian/patches/`, add to `series`, with `Forwarded:` header (URL or `no` + reason). |
+| **fix upstream via patch** | Tag points to an upstream source issue | Author a DEP-3 patch via the `gbp pq` workflow: commit on `patch-queue/<branch>`, then `gbp pq export` materialises the `.patch` file under `debian/patches/` with `series` updated. Include a `Forwarded:` header (URL or `no` + reason). See `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md` § "Patches". |
 | **justified override** | Tag is a false positive, or the right answer is to suppress for this package | `lintian-overrides` file with a `# reason:` line directly above the override. |
 | **won't fix** | Tag is real but maintainer accepts the cost | Report in summary; do NOT silently override. |
 
