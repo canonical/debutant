@@ -1,6 +1,8 @@
 # debutant — house style
 
-**Version**: 1 · **Last reviewed**: 2026-05-13 · **Next review due**: 2026-08-13
+**Version**: 2 · **Last reviewed**: 2026-05-13 · **Next review due**: 2026-08-13
+
+Tracks Debian Policy 4.7.4 (March 2026).
 
 This file is the source of truth for *prescriptive* packaging choices
 that go beyond what Debian Policy mandates. Workers consult it on
@@ -48,21 +50,34 @@ maintainer can override the active style by passing
 
 ## Control fields
 
-- `Standards-Version: 4.7.1`. **Policy** — pin a known-good value;
+- `Standards-Version: 4.7.4`. **Policy** — pin a known-good value;
   bump only as a deliberate refresh, never auto-bumped per run.
+  Re-pin at every quarterly review.
 - `Rules-Requires-Root: no` by default. **Policy §4.9.2.**
   Switch to `binary-targets` if (and only if) the package installs
   setuid/setgid files or specific ownership that fakeroot can't
   preserve. Workers MUST detect this and warn.
-- `Priority: optional` unless the package belongs to `required`,
-  `important`, or `standard` per Policy §2.5. **Policy §2.5.**
+- `Priority:`: **omit the field** for the default case. **Policy
+  §5.6.6 (4.7.3)** — specifying `Priority` in source control fields
+  is no longer recommended unless the value needs to differ from the
+  default. Omitting it inherits `optional`, which is what most
+  packages want. Set the field explicitly only for `required`,
+  `important`, or `standard` per **Policy §2.5**. Refresh workers
+  MAY propose removing a redundant `Priority: optional` line.
 - `Section`: pick from
   https://packages.debian.org/unstable/ — workers MUST NOT invent
   a section.
 - `Vcs-Git`/`Vcs-Browser`: present and correct, pointing at the
   Salsa repo by default (Debian-first). Ubuntu overlays point at
-  Launchpad. **DD-judgement.**
+  Launchpad-hosted git via the git-ubuntu workflow — see
+  `docs/references/ubuntu-merges-syncs.md`. **DD-judgement.**
 - `Maintainer`/`Uploaders`: workers NEVER mutate these. **DD-judgement.**
+- `Git-Tag-Tagger:` / `Git-Tag-Info:` (Policy 4.7.3, §5.6.32 &
+  §5.6.33): new optional source-control fields recording the
+  tagger and tag annotation that produced the release tag. Workers
+  MAY leave these to `gbp` / the release tooling; if a maintainer
+  is using them, refresh MUST NOT strip them. See
+  `docs/references/git-tag-fields.md`.
 
 ## Binary packages
 
@@ -70,8 +85,8 @@ maintainer can override the active style by passing
   worker may propose `same` for libraries with arch-specific paths,
   `foreign` for arch-independent helper binaries, but MUST verify
   no file collisions across architectures before recommending.
-  **Policy §5.6.30.** Setting `M-A: same` blindly breaks
-  coinstallation.
+  **Policy §5.6** (Multi-Arch field, documented in Policy 4.7.4).
+  Setting `M-A: same` blindly breaks coinstallation.
 - `Pre-Depends:` only when essential (e.g. `${misc:Pre-Depends}`
   for multiarch). Workers MUST justify any other Pre-Depends.
   **Policy §7.2.**
@@ -84,6 +99,10 @@ maintainer can override the active style by passing
   bad DEP-5 is worse than no DEP-5.
 - `licensecheck -r .` is a starting point, not an oracle. Workers
   MUST verify each `Files:` stanza against actual file headers.
+- For packages destined for `non-free` **or `non-free-firmware`**,
+  `debian/copyright` MUST explain why the package is not part of
+  Debian. **Policy §12.5 (4.7.4).** Workers detecting either
+  archive area MUST surface this requirement.
 
 ## debian/changelog
 
@@ -172,12 +191,51 @@ maintainer can override the active style by passing
   source-level tags, `debian/$pkg.lintian-overrides` for
   binary-level tags. **Policy/lintian convention.**
 
+## Build profiles
+
+- Policy 4.7.4 documents build profiles formally. Workers MAY
+  propose adding `<!nocheck>`, `<!nodoc>`, `<stage1>` etc. when
+  appropriate, but MUST cite a concrete reason (e.g. bootstrap
+  cycle break) — never preemptively. **Policy** (build profiles).
+- See `docs/references/build-profiles.md`.
+
+## Ubuntu overlay
+
+When `target.distro == ubuntu`, the following overlay applies on
+top of the Debian-first rules above. See
+`docs/references/ubuntu-versioning.md`,
+`docs/references/ubuntu-merges-syncs.md`, and
+`docs/references/sru.md` for the full background.
+
+- **Versioning.** New Ubuntu changes on top of a Debian package
+  append `ubuntu1`, `ubuntu2`, ... to the Debian revision (e.g.
+  `2.0-2ubuntu1`). No-change rebuilds use `buildN`. The
+  `willsync` suffix exists for the auto-sync case. Workers MUST
+  NOT invent any other suffix.
+- **Distribution.** Workers NEVER set `dch -D <release>`. The
+  maintainer chooses `noble`, `noble-proposed`, etc. when they
+  release.
+- **Pocket.** Uploads targeting a released series go to
+  `<series>-proposed` for SRU, never directly to `<series>`. The
+  orchestrator MUST surface this when `target.pocket != dev`.
+- **Maintainer field.** Ubuntu packages set
+  `Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>`
+  with the prior Debian maintainer moved to `XSBC-Original-Maintainer:`.
+  This is handled by `update-maintainer` from `ubuntu-dev-tools`;
+  workers NEVER touch it by hand. **DD-judgement** + Ubuntu policy.
+- **SRU regression-potential.** Any changelog entry targeting a
+  stable Ubuntu release MUST include a regression-potential
+  paragraph; the maintainer writes it, not the worker. See
+  `docs/references/sru.md`.
+
 ---
 
 ## Notes for future-me
 
 - Re-check Standards-Version, debhelper-compat default, and
   Salsa-CI template version at every quarterly review.
+- Re-read `/usr/share/doc/debian-policy/upgrading-checklist.txt.gz`
+  at every quarterly review and update the citations above.
 - New DEPs accepted between reviews: add to this file before
   workers can rely on them.
 - Items marked DD-judgement here may be overridden in a
