@@ -57,6 +57,46 @@ A minimal but complete `debian/` directory with:
 Templates live in `${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/templates/`.
 Render each through the house-style rules; do not copy verbatim.
 
+## Template render flags
+
+The templates use Mustache-style `{{var}}` and section
+`{{#flag}}…{{/flag}}` / inverted `{{^flag}}…{{/flag}}` markers.
+You substitute by string-matching — there is no separate render
+engine. Compute each flag once at the start of the render step.
+
+### Boolean flags
+
+| Flag | True when | Notes |
+|---|---|---|
+| `priority_nondefault` | Target `Priority:` is one of `required`, `important`, `standard`. | Otherwise the field is omitted (Policy 4.7.3 §5.6.6 — `optional` is the default and should not be stated). Default behaviour for a fresh bootstrap is `false`. |
+| `has_compiled_binaries` | `source.language` ∈ `{c, cpp, rust, go, haskell, ada, fortran}` — anything that produces native object code. | Gates the `DEB_BUILD_MAINT_OPTIONS = hardening=+all` export in `rules.tmpl`. Pure-Python/Perl/data packages get nothing. |
+| `has_signing_key` | `debian/upstream/signing-key.asc` exists in the source tree. | Gates `Pgp-Mode: auto` vs `Pgp-Mode: none` in `watch.tmpl`. Check the path explicitly; do not infer from upstream metadata. |
+| `has_template` | The upstream release pattern matches a known watch v5 `Template:` (`github`, `gitlab`, `pypi`, `sourceforge`, `cpan`, `git`). | When true, emit `Template: <name>` plus the template's required fields. When false, fall back to raw v5 fields. See `${CLAUDE_PLUGIN_ROOT}/docs/references/watch-v5.md`. |
+
+### Scalar values
+
+Pulled from context unless noted:
+
+| Variable | Source |
+|---|---|
+| `source`, `section`, `priority`, `binary`, `architecture`, `short_description` | Sanity-check step (ask the maintainer or derive from upstream metadata; never invent). |
+| `debfullname`, `debemail` | `user.debfullname`, `user.debemail` from `${DEBUTANT_CONTEXT}` / `./.debutant/context.json`. |
+| `homepage`, `vcs_browser`, `vcs_git` | Sanity-check / derived from upstream metadata. |
+| `upstream_name`, `upstream_contact`, `upstream_copyright_years`, `upstream_copyright_holder`, `upstream_license_short` | License-discovery step (`licensecheck -r .` plus a manual read of file headers). `upstream_license_short` is the SPDX-style short identifier (e.g. `MIT`, `Apache-2.0`, `GPL-2+`). |
+| `packaging_year` | `date +%Y` at render time. |
+| `pristine_tar` | `True` or `False` — `False` for a fresh bootstrap unless the maintainer asks for pristine-tar. |
+| `template_name`, `template_specific_flags`, `watch_source_fields` | See watch v5 reference for the field set. |
+
+### List flags
+
+| Flag | Shape |
+|---|---|
+| `build_deps` | List of objects `{ "name": "...", "version": "..." }`. Iterate with `{{#build_deps}} {{name}}{{#version}} ({{version}}){{/version}},\n{{/build_deps}}`. Computed from the build-deps discovery step. Always include `debhelper-compat (= 13)` in the static template body, not in this list. |
+
+When in doubt about a flag's value, **ask the maintainer**
+rather than guess — bootstrap is the most consequential phase
+and a wrong default ripples into every later run.
+
 ## What you do NOT produce
 
 - A finished long-form `Description:`. Leave the placeholder.

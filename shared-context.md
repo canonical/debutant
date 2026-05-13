@@ -106,7 +106,7 @@ Workers MUST:
 
 ## Verify-script output schema (v1)
 
-`skills/debutant/scripts/verify.sh` is the iteration-loop primitive
+`${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh` is the iteration-loop primitive
 workers consult between fix attempts. It runs a build (sbuild or
 dpkg-buildpackage) and lintian, then emits a single JSON snapshot.
 The script is **stateless**: workers hold previous snapshots in

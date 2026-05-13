@@ -51,10 +51,14 @@ maintainer can override the active style by passing
 - `Standards-Version: 4.7.4`. **Policy** — pin a known-good value;
   bump only as a deliberate refresh, never auto-bumped per run.
   Re-pin at every quarterly review.
-- `Rules-Requires-Root: no` by default. **Policy §4.9.2.**
-  Switch to `binary-targets` if (and only if) the package installs
-  setuid/setgid files or specific ownership that fakeroot can't
-  preserve. Workers MUST detect this and warn.
+- `Rules-Requires-Root`: **omit the field** for the default case.
+  **Policy §4.9.2 (4.7.x).** `no` is the policy default, so
+  specifying `Rules-Requires-Root: no` in `debian/control` is
+  redundant; refresh workers MAY propose removing such a line.
+  Set the field explicitly to `binary-targets` if (and only if)
+  the package installs setuid/setgid files or specific ownership
+  that fakeroot can't preserve. Workers MUST detect setuid/setgid
+  build outputs and warn.
 - `Priority:`: **omit the field** for the default case. **Policy
   §5.6.6 (4.7.3)** — specifying `Priority` in source control fields
   is no longer recommended unless the value needs to differ from the

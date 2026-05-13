@@ -84,7 +84,7 @@ changes. Flags:
    tree and produce a structured report:
    ```
    compat:           current=12, target=13         [eligible]
-   standards:        current=4.6.0, target=4.7.1   [eligible]
+   standards:        current=4.6.0, target=4.7.4   [eligible]
    rrr:              present but not needed        [eligible]
    dh-sequence:      uses --with python3,golang    [eligible]
    wrap-and-sort:    unsorted Build-Depends        [eligible]

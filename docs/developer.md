@@ -92,13 +92,30 @@ Reference docs live under `docs/references/`. Keep them:
 
 The house style and references go stale. Quarterly, check:
 
-- [ ] `Standards-Version` default in `house-style.md` vs current
-      Debian Policy package version.
-- [ ] `debhelper-compat` default vs current debhelper.
-- [ ] Salsa-CI pinned ref in `salsa-ci.md` and the bootstrap
-      template.
-- [ ] Each `references/*.md` `Last reviewed` date < 6 months.
+- [ ] `Standards-Version` default in `house-style.md` matches
+      both `skills/bootstrap/templates/control.tmpl` and the
+      current Debian Policy package version.
+- [ ] `debhelper-compat` default in `house-style.md` matches
+      `skills/bootstrap/templates/control.tmpl` and current
+      debhelper.
+- [ ] Salsa-CI pinned ref in `docs/references/salsa-ci.md` and
+      `skills/bootstrap/templates/salsa-ci.yml.tmpl`.
+- [ ] Each `docs/references/*.md` `Last reviewed` date < 6 months.
 - [ ] Any new accepted DEPs.
+
+**Drift hot-spots.** A handful of values are pinned in
+`docs/house-style.md` AND duplicated in
+`skills/bootstrap/templates/`. They must move together:
+
+| Value | Files |
+|---|---|
+| `debhelper-compat` version | `docs/house-style.md` (debhelper §) + `skills/bootstrap/templates/control.tmpl` |
+| `Standards-Version` | `docs/house-style.md` (Control fields §) + `skills/bootstrap/templates/control.tmpl` |
+| Salsa-CI pinned ref | `docs/references/salsa-ci.md` + `skills/bootstrap/templates/salsa-ci.yml.tmpl` |
+| Watch syntax version | `docs/house-style.md` (debian/watch §) + `skills/bootstrap/templates/watch.tmpl` |
+
+`debian/control` has no comment syntax, so no inline reminder
+lives in the template — the discipline is here.
 
 ## Style for SKILL.md prompts
 
