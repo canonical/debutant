@@ -86,6 +86,32 @@ if [[ -d "$ROOT/debian" ]]; then
   fi
 fi
 
+# --- Ubuntu delta ------------------------------------------------------------
+#
+# null  : not an Ubuntu package (caller will set to null when distro=debian).
+# true  : changelog top entry shows an Ubuntu revision (e.g. -2ubuntu1).
+# false : changelog top entry is bare Debian or a buildN no-change rebuild.
+#
+# The orchestrator overwrites this with null when target.distro=debian. We
+# always probe so the standalone script output is self-contained.
+ubuntu_delta=null
+if [[ -r "$ROOT/debian/changelog" ]]; then
+  top_version="$(awk 'NR==1 {
+    if (match($0, /\(([^)]+)\)/, m)) print m[1]
+    exit
+  }' "$ROOT/debian/changelog" 2>/dev/null || true)"
+  if [[ -n "$top_version" ]]; then
+    # ubuntu suffix that is *not* a no-change rebuild (buildN)
+    if [[ "$top_version" == *ubuntu* && "$top_version" != *build* ]]; then
+      ubuntu_delta=true
+    elif [[ "$top_version" == *willsync* ]]; then
+      ubuntu_delta=true
+    else
+      ubuntu_delta=false
+    fi
+  fi
+fi
+
 # --- branch layout + upstream VCS -------------------------------------------
 
 debian_branch_layout="unknown"
@@ -126,10 +152,12 @@ jq -n \
   --argjson has_quilt_patches "$has_quilt_patches" \
   --arg debian_branch_layout "$debian_branch_layout" \
   --arg upstream_vcs "$upstream_vcs" \
+  --argjson ubuntu_delta "$ubuntu_delta" \
   '{path: $path,
     language: $language,
     build_system: $build_system,
     has_debian_dir: $has_debian_dir,
     has_quilt_patches: $has_quilt_patches,
     debian_branch_layout: $debian_branch_layout,
-    upstream_vcs: $upstream_vcs}'
+    upstream_vcs: $upstream_vcs,
+    ubuntu_delta: $ubuntu_delta}'

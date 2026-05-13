@@ -43,23 +43,33 @@ Workers MUST:
     "has_debian_dir": true,
     "has_quilt_patches": false,
     "debian_branch_layout": "monorepo|dep14|separate-branch|none|unknown",
-    "upstream_vcs": "git|hg|svn|tarball|none|unknown"
+    "upstream_vcs": "git|hg|svn|tarball|none|unknown",
+    "ubuntu_delta": null
   },
   "tooling": {
-    "sbuild":         {"available": true,  "version": "x.y"},
-    "pbuilder":       {"available": false, "version": null},
-    "autopkgtest":    {"available": true,  "version": "x.y"},
-    "lintian":        {"available": true,  "version": "x.y"},
-    "debputy":        {"available": false, "version": null},
-    "wrap-and-sort":  {"available": true,  "version": "x.y"},
-    "gbp":            {"available": true,  "version": "x.y"},
-    "dh_make":        {"available": true,  "version": "x.y"},
-    "cme":            {"available": false, "version": null}
+    "sbuild":             {"available": true,  "version": "x.y"},
+    "pbuilder":           {"available": false, "version": null},
+    "autopkgtest":        {"available": true,  "version": "x.y"},
+    "lintian":            {"available": true,  "version": "x.y"},
+    "debputy":            {"available": false, "version": null},
+    "wrap-and-sort":      {"available": true,  "version": "x.y"},
+    "gbp":                {"available": true,  "version": "x.y"},
+    "dh_make":            {"available": true,  "version": "x.y"},
+    "cme":                {"available": false, "version": null},
+    "git-ubuntu":         {"available": false, "version": null},
+    "requestsync":        {"available": false, "version": null},
+    "pull-debian-source": {"available": false, "version": null},
+    "pull-lp-source":     {"available": false, "version": null},
+    "syncpackage":        {"available": false, "version": null},
+    "update-maintainer":  {"available": false, "version": null},
+    "mk-sbuild":          {"available": false, "version": null}
   },
   "target": {
-    "distro":  "debian|ubuntu",
-    "release": "unstable|trixie|noble|...|unknown",
-    "host_arch": "amd64|arm64|..."
+    "distro":       "debian|ubuntu",
+    "release":      "unstable|trixie|forky|stonking|resolute|noble|...|unknown",
+    "pocket":       "dev|proposed|updates|security|backports",
+    "freeze_state": "none|debian-import-freeze|feature-freeze|final-freeze|unknown",
+    "host_arch":    "amd64|arm64|..."
   },
   "user": {
     "debfullname": "value of DEBFULLNAME or git config user.name",
@@ -74,6 +84,25 @@ Workers MUST:
   "house_style": "absolute path to house-style.md (orchestrator passes the active one)"
 }
 ```
+
+## Field semantics — Ubuntu-specific
+
+- **`source.ubuntu_delta`** — `true` if `debian/changelog` shows
+  any non-`buildN` Ubuntu revision (e.g. `2.0-2ubuntu1`); `false`
+  if the package is in Ubuntu but carries no delta from Debian
+  (eligible for sync); `null` when `target.distro != ubuntu`.
+  See `docs/references/ubuntu-merges-syncs.md`.
+- **`target.pocket`** — `dev` for the in-development series
+  (Debian unstable, current Ubuntu devel). `proposed`/`updates`/
+  `security`/`backports` apply to released Ubuntu series and
+  pull in the SRU workflow (see `docs/references/sru.md`).
+  Default: `dev`.
+- **`target.freeze_state`** — Ubuntu release-cycle gate currently
+  in effect, or `none`. The orchestrator uses this to add a
+  freeze warning to the confirmation gate when running against a
+  frozen dev release. The detect step MAY leave this `unknown`
+  if it cannot determine it cheaply; workers MUST then treat
+  cautious behaviour as default.
 
 ## Verify-script output schema (v1)
 

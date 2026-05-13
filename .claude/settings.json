@@ -14,7 +14,9 @@
       "Bash(git clean -fdx:*)",
       "Bash(git clean -fxd:*)",
       "Bash(dch -r:*)",
-      "Bash(dch --release:*)"
+      "Bash(dch --release:*)",
+      "Bash(dch -D:*)",
+      "Bash(dch --distribution:*)"
     ]
   }
 }

@@ -27,6 +27,7 @@ between iteration attempts — see `shared-context.md`.
 | `hello-rust/` | Rust, cargo, library + bin | bootstrap |
 | `hello-python/` | Python, pyproject, library | bootstrap, autopkgtest |
 | `stale-debian/` | Pre-existing out-of-date debian/ | refresh, lintian |
+| `ubuntu-merge/` | Debian + Ubuntu delta pair       | merge (future) |
 
 ## Status
 

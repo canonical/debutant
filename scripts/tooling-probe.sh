@@ -31,20 +31,28 @@ probe() {
 
 cat <<EOF
 {
-  "sbuild":          $(probe sbuild),
-  "pbuilder":        $(probe pbuilder),
-  "autopkgtest":     $(probe autopkgtest),
-  "lintian":         $(probe lintian),
-  "debputy":         $(probe debputy),
-  "wrap-and-sort":   $(probe wrap-and-sort),
-  "gbp":             $(probe gbp),
-  "dh_make":         $(probe dh_make),
-  "cme":             $(probe cme),
-  "blhc":            $(probe blhc),
-  "hardening-check": $(probe hardening-check),
-  "licensecheck":    $(probe licensecheck),
-  "uscan":           $(probe uscan),
-  "dch":             $(probe dch),
-  "jq":              $(probe jq)
+  "sbuild":             $(probe sbuild),
+  "pbuilder":           $(probe pbuilder),
+  "autopkgtest":        $(probe autopkgtest),
+  "lintian":            $(probe lintian),
+  "debputy":            $(probe debputy),
+  "wrap-and-sort":      $(probe wrap-and-sort),
+  "gbp":                $(probe gbp),
+  "dh_make":            $(probe dh_make),
+  "cme":                $(probe cme),
+  "blhc":               $(probe blhc),
+  "hardening-check":    $(probe hardening-check),
+  "licensecheck":       $(probe licensecheck),
+  "uscan":              $(probe uscan),
+  "dch":                $(probe dch),
+  "jq":                 $(probe jq),
+  "git-ubuntu":         $(probe git-ubuntu),
+  "requestsync":        $(probe requestsync),
+  "pull-debian-source": $(probe pull-debian-source),
+  "pull-lp-source":     $(probe pull-lp-source),
+  "syncpackage":        $(probe syncpackage),
+  "update-maintainer":  $(probe update-maintainer),
+  "mk-sbuild":          $(probe mk-sbuild),
+  "reportbug":          $(probe reportbug)
 }
 EOF

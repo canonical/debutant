@@ -26,10 +26,13 @@ source tree that has none.
 A minimal but complete `debian/` directory with:
 
 - `debian/control` — house-style fields, accurate `Source:`,
-  `Section:`, `Priority:`, `Build-Depends:` derived from the
-  build system, one or more binary stanzas. Long `Description:`
-  is left as `<INSERT LONG DESCRIPTION HERE>` for the maintainer
-  to fill in — NEVER invent prose marketing copy.
+  `Section:`, `Build-Depends:` derived from the build system, one
+  or more binary stanzas. **Omit the `Priority:` field unless the
+  package is `required`/`important`/`standard`** — Policy 4.7.3
+  deprecated specifying the default (`optional`). `Standards-Version`
+  is set from `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md` (currently
+  4.7.4). Long `Description:` is left as `<INSERT LONG DESCRIPTION HERE>`
+  for the maintainer to fill in — NEVER invent prose marketing copy.
 - `debian/changelog` — created with `dch --create
   --package=<name> --newversion=<upstream-version>-1
   "Initial packaging."` then immediately set distribution to
