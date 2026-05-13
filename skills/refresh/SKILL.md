@@ -63,11 +63,13 @@ changes. Flags:
 
 - `--compat[=N]` — bump debhelper-compat to N (default: house-style value).
 - `--standards-version[=X.Y.Z]` — bump Standards-Version (default: house-style value).
-- `--rrr` — add or normalise `Rules-Requires-Root: no`.
+- `--rrr` — review `Rules-Requires-Root` for d/control file and remove
+  it if it's set to `no` as it's the default one in the latest version
+  of the policy.
 - `--dh-sequence` — convert `dh $@ --with foo` to
   `dh-sequence-foo` Build-Depends.
 - `--wrap-and-sort` — run `wrap-and-sort -ast`.
-- `--watch-v4` — upgrade `debian/watch` to v4 syntax.
+- `--watch-v5` — upgrade `debian/watch` to v5 syntax.
 - `--dep5` — normalise `debian/copyright` to DEP-5.
 - `--m-a-audit` — produce an advisory report on `Multi-Arch:`
   candidates; never writes.
@@ -83,9 +85,9 @@ changes. Flags:
    ```
    compat:           current=12, target=13         [eligible]
    standards:        current=4.6.0, target=4.7.1   [eligible]
-   rrr:              missing                       [eligible]
+   rrr:              present but not needed        [eligible]
    dh-sequence:      uses --with python3,golang    [eligible]
-   wrap-and-sort:    unsorted Build-Depends         [eligible]
+   wrap-and-sort:    unsorted Build-Depends        [eligible]
    watch:            v3                            [eligible]
    dep5:             freeform                      [eligible]
    m-a:              no annotations                [advisory]
