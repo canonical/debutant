@@ -68,7 +68,7 @@ to encode by hand.
 
 | `source.language` | `Testsuite:` value | Notes |
 |---|---|---|
-| `python` | `autopkgtest-pkg-python` | TBD — language overlay (`docs/references/languages/python.md`) covers `import` vs package-name nuances. |
+| `python` | `autopkgtest-pkg-python` | Generates `python3 -c "import <name>"` per `python3-*` binary; the import name is derived from the package suffix. Set `X-Python3-Module:` when it diverges. See `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "autopkgtest". |
 | `perl` | `autopkgtest-pkg-perl` | TBD — language overlay (`docs/references/languages/perl.md`) covers XS-vs-pure-Perl test deps. |
 | `ruby` | `autopkgtest-pkg-ruby` | Ruby overlay deferred; the generator works without an overlay. |
 | `nodejs` | `autopkgtest-pkg-nodejs` | No overlay planned in this pass; the generator works without one. |

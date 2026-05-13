@@ -112,6 +112,7 @@ Pulled from context unless noted:
 | `pristine_tar` | `True` or `False` — `False` for a fresh bootstrap unless the maintainer asks for pristine-tar. |
 | `template_name`, `template_specific_flags`, `watch_source_fields` | See watch v5 reference for the field set. |
 | `language` | `source.language` from `${DEBUTANT_CONTEXT}` / `./.debutant/context.json`. Drives the template dispatch above. |
+| `pybuild_name` | Used by `rules.python.tmpl`. The upstream *import* name (what you write in `import …`), not the source-package name. See `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Package naming". |
 
 ### List flags
 
@@ -150,7 +151,13 @@ and a wrong default ripples into every later run.
    (`Cargo.toml`, `go.mod`, `pyproject.toml`, `configure.ac`,
    `CMakeLists.txt`, etc.) and translate to Debian package names
    when known. For unknown mappings, list them in a follow-up
-   block for the maintainer.
+   block for the maintainer. When `source.language` matches a
+   language overlay, consult the overlay for the canonical
+   Build-Depends template:
+
+   - **Python** (`pyproject.toml` / `setup.py` / `setup.cfg`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md`
+     § "debian/control essentials".
 5. **Generate `debian/`** from templates + computed values.
 6. **`wrap-and-sort -ast`** on the result.
 7. **First verify.** Call `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`

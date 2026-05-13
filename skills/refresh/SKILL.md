@@ -88,7 +88,7 @@ flag-driven ones above. These checks surface in the audit report
 enables the relevant generic flag (`--watch-v5`, `--dh-sequence`,
 etc.) — they do not introduce new flags.
 
-- **Python**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` lands.
+- **Python**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Common refresh checks". Surface: missing `dh-sequence-python3`, legacy `X-Python-Version` cruft, `debian/watch` not on v5 + `Template: pypi`, missing `Testsuite: autopkgtest-pkg-python` on library packages, Python 2 build-dep residue (`python`, `python-dev`, `python-minimal`), missing `${python3:Depends}` substvar in binary stanzas.
 - **Rust**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` lands.
 - **Go**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` lands.
 - **Perl**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` lands.
