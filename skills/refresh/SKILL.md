@@ -88,7 +88,7 @@ changes. Flags:
    rrr:              present but not needed        [eligible]
    dh-sequence:      uses --with python3,golang    [eligible]
    wrap-and-sort:    unsorted Build-Depends        [eligible]
-   watch:            v3                            [eligible]
+   watch:            v4                            [eligible]
    dep5:             freeform                      [eligible]
    m-a:              no annotations                [advisory]
    salsa-ci:         absent                        [eligible]

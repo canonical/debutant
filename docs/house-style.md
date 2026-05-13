@@ -33,9 +33,7 @@ maintainer can override the active style by passing
 ## debhelper
 
 - `debhelper-compat (= 13)` as Build-Depends (virtual package).
-  **DD-judgement** — 13 is stable and ubiquitous as of 2026-05;
-  14 only when the maintainer opts in via flag and the package has
-  no setuid binaries that depend on `Rules-Requires-Root` interactions.
+  **DD-judgement** — 13 is battle-tested now
 - Use `dh-sequence-<name>` virtual Build-Depends to load add-ons,
   not `--with` in `debian/rules`. **DD-judgement** — declarative,
   surfaces dependencies to apt, lintian-checkable.
@@ -115,11 +113,12 @@ maintainer can override the active style by passing
 
 ## debian/watch
 
-- Version 4 syntax. **DD-judgement.**
-- `pgpmode=auto` (or `mangle`) ONLY when
-  `debian/upstream/signing-key.asc` exists. Otherwise `pgpmode=none`.
-  Workers MUST check for the key before enabling signature
-  verification.
+- Version 5 syntax. **DD-judgement.**
+- `Pgp-Mode: auto` (or `mangle`) ONLY when `debian/upstream/signing-key.asc`
+  exists. Otherwise `Pgp-Mode: none`.  Workers MUST check for the key before
+  enabling signature verification.
+- Use the proper fields depending on the existence of a template for the
+  source, ask the developer if needed rather than guessing or parsing manpages.
 - Prefer `git mode` for projects without tarball releases.
   **DD-judgement.**
 
@@ -177,8 +176,9 @@ maintainer can override the active style by passing
 
 ## Hardening
 
-- Rely on `dpkg-buildflags` defaults; do not override unless the
-  package needs an opt-out (and justify it). **DD-judgement.**
+- Set `export DEB_BUILD_MAINT_OPTIONS = hardening=+all` in `debian/rules` by
+  default; Override the hardening set only with explicit justification (e.g. an
+  upstream that breaks under FORTIFY). **DD-judgement.**
 - `blhc` clean on the build log. **DD-judgement.**
 
 ## Lintian

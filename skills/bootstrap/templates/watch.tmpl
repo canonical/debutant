@@ -1,9 +1,14 @@
-version=4
+Version: 5
 {{#has_signing_key}}
-opts=pgpmode=auto \
+Pgp-Mode: auto
 {{/has_signing_key}}
 {{^has_signing_key}}
-opts=pgpmode=none \
+Pgp-Mode: none
 {{/has_signing_key}}
-{{watch_url}} \
-  {{watch_filenameregex}}
+{{#has_template}}
+Template: {{template_name}}
+{{template_specific_flags}}
+{{/has_template}}
+{{^has_template}}
+{{watch_source_fields}}
+{{/has_template}}

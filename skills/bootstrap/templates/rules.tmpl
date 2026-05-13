@@ -1,4 +1,8 @@
 #!/usr/bin/make -f
 
+{{#has_compiled_binaries}}
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+{{/has_compiled_binaries}}
+
 %:
 	dh $@
