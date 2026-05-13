@@ -7,5 +7,5 @@ sdks:
     channel: latest/stable
 
 actions:
-  claude:      direnv exec /project claude --dangerously-skip-permissions "$@"
-  claude-exec: direnv exec /project claude --bare --print "$@"
+  claude:      direnv exec /project claude --plugin-dir /project --dangerously-skip-permissions "$@"
+  claude-exec: direnv exec /project claude --plugin-dir /project --bare --print "$@"

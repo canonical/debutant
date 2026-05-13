@@ -1,9 +1,9 @@
 ---
-name: debutant-refresh
+name: refresh
 description: Modernise an existing debian/ directory to current house style — compat bump, Standards-Version, R³, dh-sequence migration, wrap-and-sort, watch v4, DEP-5 normalisation, M-A audit, Salsa-CI. Default dry-run. The most dangerous worker; treat the maintainer's prior choices with respect.
 ---
 
-# debutant-refresh
+# debutant:refresh
 
 Modernise an existing `debian/` directory to the active house style.
 
@@ -14,14 +14,31 @@ maintainer accept or reject each one. **Default mode is dry-run.**
 
 ## Preconditions
 
-- A context JSON exists.
+- A context JSON exists at `./.debutant/context.json`. If missing,
+  build it: run `${CLAUDE_PLUGIN_ROOT}/scripts/detect-source.sh`
+  and `${CLAUDE_PLUGIN_ROOT}/scripts/tooling-probe.sh`, merge their
+  outputs (see `${CLAUDE_PLUGIN_ROOT}/shared-context.md` for the
+  full schema).
 - `source.has_debian_dir == true`. If `false`, refuse and suggest
-  `debutant-bootstrap`.
+  `/debutant:bootstrap`.
 
 ## Hard rules
 
-In addition to the suite-wide rules in
-`../debutant/shared-context.md` § "What workers MUST NOT do":
+Suite-wide (apply to every debutant skill):
+
+- Never invoke `dput`, `debrelease`, `dgit push`, or any upload
+  command.
+- Never `git push` to any remote.
+- Never edit `debian/changelog` distribution from `UNRELEASED` to
+  anything else.
+- Never edit `Maintainer:` or `Uploaders:` fields.
+- Never edit upstream source files directly (use `debian/patches/`
+  with DEP-3 headers).
+- Never run `rm -rf` or `git clean -fdx` on the workspace.
+- Never write a lintian override without a `# reason` comment.
+- Never set `Multi-Arch: same` without verifying file paths.
+
+Phase-specific (refresh):
 
 - **Default to dry-run.** Produce a single diff against the
   existing tree; do not write until the maintainer says go.
@@ -57,6 +74,7 @@ changes. Flags:
 - `--salsa-ci` — add or update `debian/salsa-ci.yml`.
 - `--all` — enable everything above except `--m-a-audit` (which
   is always advisory).
+- `--yes` — skip the confirmation gate before writing.
 
 ## Process
 
@@ -87,8 +105,9 @@ changes. Flags:
    anyway when not `--yes`.
 5. **Apply phase** (only if maintainer approves). Write the diff
    to the tree. Re-run `wrap-and-sort -ast` if it was enabled. Run
-   `sbuild` and `lintian -EvIL +pedantic` to verify the result.
-   Honour the iteration-budget envelope.
+   `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh` to confirm the result
+   still builds and lintian is no worse than before. Honour the
+   iteration-budget envelope.
 6. **Report.** Files changed, build/lint status, any items
    deferred to the maintainer.
 
@@ -100,3 +119,7 @@ changes. Flags:
 - Diff exceeds threshold and maintainer declines confirmation.
 - DEP-5 normalisation produces ambiguity (any `Files:` stanza you
   can't classify with confidence).
+
+Use the bail-out summary format from
+`${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "Bail-out summary
+format".

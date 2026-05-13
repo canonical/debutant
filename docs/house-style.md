@@ -4,7 +4,9 @@
 
 This file is the source of truth for *prescriptive* packaging choices
 that go beyond what Debian Policy mandates. Workers consult it on
-every run. Every rule below carries one of:
+every run via `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md`; a
+maintainer can override the active style by passing
+`--house-style=<path>` to the orchestrator. Every rule below carries one of:
 
 - **Policy** §x.y — Debian Policy Manual reference
 - **devref** §x.y — Debian Developer's Reference reference

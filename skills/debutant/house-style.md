@@ -1,1 +1,0 @@
-../../docs/house-style.md

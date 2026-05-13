@@ -1,15 +1,19 @@
 ---
-name: debutant-autopkgtest
-description: Add or improve debian/tests/ for as-installed package testing per DEP-8. Detects package shape (library, daemon, CLI tool), proposes minimal Restrictions, runs tests with the lightest virt backend available. Asks the maintainer before enabling isolation-container or needs-root.
+name: autopkgtest
+description: Add or improve debian/tests/ for as-installed Debian package testing per DEP-8. Detects package shape (library, daemon, CLI tool), proposes minimal Restrictions, runs tests with the lightest virt backend available. Asks the maintainer before enabling isolation-container or needs-root.
 ---
 
-# debutant-autopkgtest
+# debutant:autopkgtest
 
 Add or improve `debian/tests/` for as-installed testing.
 
 ## Preconditions
 
-- A context JSON exists.
+- A context JSON exists at `./.debutant/context.json`. If missing,
+  build it: run `${CLAUDE_PLUGIN_ROOT}/scripts/detect-source.sh`
+  and `${CLAUDE_PLUGIN_ROOT}/scripts/tooling-probe.sh`, merge their
+  outputs (see `${CLAUDE_PLUGIN_ROOT}/shared-context.md` for the
+  full schema).
 - `source.has_debian_dir == true`.
 - The package builds (you don't need to verify; the orchestrator
   ensures this when chained).
@@ -68,11 +72,12 @@ approval.** Do not enable them silently.
 5. **Write phase.** Create `debian/tests/control` and the test
    scripts. Make scripts executable. Run `wrap-and-sort` on
    control if applicable.
-6. **Verification phase.** If `autopkgtest` is available, run
-   `autopkgtest -- null` first (cheapest). On success, suggest
-   running under `autopkgtest-virt-qemu` or
-   `autopkgtest-virt-lxc` if installed; ask before launching
-   (those are slow).
+6. **Verification phase.** If `tooling.autopkgtest.available ==
+   false`, report that tests are authored but not verified and
+   stop here. Otherwise run `autopkgtest -- null` first
+   (cheapest). On success, suggest running under
+   `autopkgtest-virt-qemu` or `autopkgtest-virt-lxc` if
+   installed; ask before launching (those are slow).
 7. **Report.** Files added, test results, restrictions chosen,
    anything deferred.
 
@@ -93,8 +98,21 @@ approval.** Do not enable them silently.
 
 ## Hard rules
 
-In addition to the suite-wide rules in
-`../debutant/shared-context.md`:
+Suite-wide (apply to every debutant skill):
+
+- Never invoke `dput`, `debrelease`, `dgit push`, or any upload
+  command.
+- Never `git push` to any remote.
+- Never edit `debian/changelog` distribution from `UNRELEASED` to
+  anything else.
+- Never edit `Maintainer:` or `Uploaders:` fields.
+- Never edit upstream source files directly (use `debian/patches/`
+  with DEP-3 headers).
+- Never run `rm -rf` or `git clean -fdx` on the workspace.
+- Never write a lintian override without a `# reason` comment.
+- Never set `Multi-Arch: same` without verifying file paths.
+
+Phase-specific (autopkgtest):
 
 - **Never enable `isolation-container` or `needs-root` without
   asking the maintainer.**
@@ -112,3 +130,7 @@ In addition to the suite-wide rules in
   declines.
 - `autopkgtest -- null` fails for reasons not attributable to
   the test (env issue, broken backend).
+
+Use the bail-out summary format from
+`${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "Bail-out summary
+format".

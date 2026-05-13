@@ -1,10 +1,19 @@
 # Shared context contract
 
-This file documents the runtime contract that all `debutant-*`
-workers obey. When workers are invoked through the orchestrator,
-the orchestrator builds the context once and passes it in. When a
-worker is invoked directly, the worker builds the context itself
-using the same scripts.
+This file is the developer-facing spec that all debutant skills
+implement. It documents the runtime context schema, the verify
+script's output, the iteration-budget envelope, and the bail-out
+format.
+
+Worker `SKILL.md` files inline the parts they need to attend to at
+every invocation (hard rules, the short reactive templates). They
+reference this file by absolute path
+(`${CLAUDE_PLUGIN_ROOT}/shared-context.md`) for the longer
+schemas, which they `Read` only when consuming them.
+
+If you change a hard rule or the bail-out format here, update all
+five worker `SKILL.md` files to match — see `docs/developer.md`
+for the contributor checklist.
 
 ## How context is passed
 
@@ -16,9 +25,10 @@ Workers MUST:
 
 1. Check `${DEBUTANT_CONTEXT}` first.
 2. Fall back to `./.debutant/context.json`.
-3. If neither exists, run `skills/debutant/scripts/detect-source.sh`
-   and `skills/debutant/scripts/tooling-probe.sh` themselves, then
-   merge their outputs.
+3. If neither exists, run
+   `${CLAUDE_PLUGIN_ROOT}/scripts/detect-source.sh` and
+   `${CLAUDE_PLUGIN_ROOT}/scripts/tooling-probe.sh` themselves,
+   then merge their outputs.
 
 ## JSON schema (v1)
 

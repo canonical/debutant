@@ -3,6 +3,14 @@
 How to extend `debutant` with a new worker, fixture, or reference
 doc.
 
+`debutant` is packaged as a Claude Code plugin. The plugin
+manifest is `.claude-plugin/plugin.json`; everything else
+(skills, scripts, docs, tests) sits at the plugin root. Skills
+become slash commands under the `/debutant:` namespace —
+`skills/lintian/SKILL.md` ⇒ `/debutant:lintian`, and so on. The
+orchestrator lives at `skills/run/` and is invoked as
+`/debutant:run`.
+
 ## Adding a new worker
 
 A worker is a Claude Code skill — a directory under `skills/`
@@ -10,50 +18,65 @@ containing at least `SKILL.md`.
 
 Steps:
 
-1. **Pick a name.** Workers are named `debutant-<phase>`. Phases
-   so far: `bootstrap`, `refresh`, `lintian`, `autopkgtest`.
+1. **Pick a name.** Workers are named after their phase:
+   `bootstrap`, `refresh`, `lintian`, `autopkgtest`. Pick a short
+   verb or noun; the slash command will be `/debutant:<name>`.
 2. **Create the skill directory.**
    ```
-   mkdir -p skills/debutant-<phase>
+   mkdir -p skills/<name>
    ```
 3. **Write `SKILL.md`** with frontmatter:
    ```yaml
    ---
-   name: debutant-<phase>
+   name: <name>
    description: One sentence the orchestrator (and skill discovery)
-     will use to decide when to invoke this. Be specific about the
-     trigger.
+     will use to decide when to invoke this. Lead with the user
+     intent, not the implementation. Mention "Debian" or "Debian
+     source package" to anchor scope.
    ---
    ```
    The body MUST cover:
-   - Preconditions (what must be true about the context).
-   - Hard rules (inherit from `shared-context.md`, plus
-     phase-specific bans).
+   - Preconditions (what must be true about the context, including
+     the "if context.json is missing, build it via the probe
+     scripts" recovery path).
+   - Hard rules — both the suite-wide ones (inlined, see below)
+     and any phase-specific bans.
    - Process (numbered steps from input to output).
    - Bail-out conditions.
-4. **Honour the shared context.** Read
-   `skills/debutant/shared-context.md` and ensure the worker:
-   - Reads context from `$DEBUTANT_CONTEXT` or
-     `./.debutant/context.json`.
-   - Builds context itself if neither exists.
-   - Honours `budget.max_attempts_per_error_class` and
-     `budget.diff_threshold_lines`.
-   - Uses the bail-out summary format on failure.
-5. **Cite the house style.** Every prescriptive choice in the
-   worker output must trace back to `docs/house-style.md` or
-   `docs/references/*.md`.
-6. **Update the orchestrator.** Add the phase to the list in
-   `skills/debutant/SKILL.md` and the dispatch logic.
-7. **Add a fixture** under `tests/fixtures/` that exercises the
+4. **Inline the suite-wide hard rules.** Each worker's `## Hard
+   rules` section opens with the suite-wide list verbatim, then
+   adds phase-specific rules. The canonical list lives in
+   `shared-context.md`. If you change one rule, update all five
+   worker `SKILL.md` files and the spec file in the same commit.
+5. **Reference shared assets by `${CLAUDE_PLUGIN_ROOT}`.** The
+   plugin runtime substitutes that variable before the LLM sees
+   the prompt. Always use it; never use `../<sibling-skill>/...`
+   — that path will not resolve after the plugin is installed.
+
+   Common references:
+   - `${CLAUDE_PLUGIN_ROOT}/scripts/detect-source.sh`
+   - `${CLAUDE_PLUGIN_ROOT}/scripts/tooling-probe.sh`
+   - `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`
+   - `${CLAUDE_PLUGIN_ROOT}/shared-context.md`
+   - `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md`
+   - `${CLAUDE_PLUGIN_ROOT}/docs/references/*.md`
+6. **Cite the house style.** Every prescriptive choice in the
+   worker output must trace back to
+   `${CLAUDE_PLUGIN_ROOT}/docs/house-style.md` or
+   `${CLAUDE_PLUGIN_ROOT}/docs/references/*.md`.
+7. **Update the orchestrator.** Add the phase to the dispatch
+   table in `skills/run/SKILL.md`.
+8. **Add a fixture** under `tests/fixtures/` that exercises the
    worker end-to-end (or annotate an existing fixture to cover
    the new phase).
-8. **Update the README phase list.**
+9. **Update the README phase list.**
 
 ## Adding a fixture
 
 See `tests/fixtures/README.md`. Each fixture is a minimal
 upstream tree plus an `expected/` golden output and a `test.sh`
-driver.
+driver. `tests/run-fixtures.sh` walks the fixtures directory and
+runs each fixture's `test.sh`.
 
 ## Adding a reference doc
 
@@ -83,8 +106,7 @@ The house style and references go stale. Quarterly, check:
 - **Bullet rules, not paragraphs.** Easier for the model to
   attend to.
 - **Hard rules in a dedicated section** titled "Hard rules". Use
-  the same phrasing as `shared-context.md` so the prompts
-  reinforce.
+  the same phrasing across workers so the prompts reinforce.
 - **Examples for fiddly formats.** E.g. show what a good
   `lintian-overrides` comment looks like; the model will copy
   the shape.
@@ -94,10 +116,23 @@ The house style and references go stale. Quarterly, check:
 ## Testing changes locally
 
 ```
-# From the source tree of a real package:
-DEBUTANT_CONTEXT=$PWD/.debutant/context.json \
-  claude --bare --print "$(< prompt-fixture.md)"
+# Load the plugin from this checkout for the current session:
+claude --plugin-dir /path/to/debutant
+
+# Then invoke a worker as a slash command:
+/debutant:lintian
 ```
 
-The workshop's `claude-exec` action wires the same thing — see
-`workshop.yaml`.
+After editing a skill, run `/reload-plugins` to pick up changes
+without restarting Claude Code.
+
+The workshop's `claude-exec` action wires the equivalent
+non-interactive form — see `workshop.yaml`.
+
+## Plugin manifest
+
+`.claude-plugin/plugin.json` carries the plugin name, description,
+version, and author. The `name` field controls the slash-command
+namespace (`/debutant:<skill>`). Bump `version` on every release
+that ships to users — Claude Code uses it to decide whether to
+re-fetch the plugin.

@@ -6,16 +6,17 @@ This directory serves two purposes simultaneously:
    project that exercises one or more workers.
 2. **Reference corpus.** Workers consult `<fixture>/debian/` (for
    fixtures that have one) as idiom examples — see
-   `skills/debutant/shared-context.md` § "Reference-corpus contract".
+   `shared-context.md` § "Reference-corpus contract" at the
+   plugin root.
 
 The fixture driver lives one level up at `tests/run-fixtures.sh`.
 It walks each fixture, runs `<fixture>/test.sh` if executable, and
 reports `[PASS]`/`[FAIL]`/`[STUB]` per fixture. Pass `--strict` to
 fail when stubs remain.
 
-Not to be confused with `skills/debutant/scripts/verify.sh`, which
-is the build+lintian snapshot tool that worker skills call between
-iteration attempts — see `skills/debutant/shared-context.md`.
+Not to be confused with `scripts/verify.sh` (at the plugin root),
+which is the build+lintian snapshot tool that worker skills call
+between iteration attempts — see `shared-context.md`.
 
 ## Fixtures (planned)
 
@@ -42,7 +43,7 @@ When promoting a fixture from stub to real:
 3. Add a `<fixture>/test.sh` driver that:
    - Copies upstream to a scratch dir.
    - Runs the relevant worker via
-     `claude --bare --print '/debutant-bootstrap ...'`.
+     `${DEBUTANT_CLAUDE_CMD:-claude --bare --print} '/debutant:bootstrap ...'`.
    - Diffs the produced `debian/` against `expected/debian/`.
    - Reports lintian/sbuild status.
 
