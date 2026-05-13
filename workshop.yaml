@@ -1,0 +1,11 @@
+name: workshop-openrouter-claude-code
+base: ubuntu@24.04
+sdks:
+  - name: claude-code
+    channel: latest/stable
+  - name: direnvrc
+    channel: latest/stable
+
+actions:
+  claude:      direnv exec /project claude --dangerously-skip-permissions "$@"
+  claude-exec: direnv exec /project claude --bare --print "$@"
