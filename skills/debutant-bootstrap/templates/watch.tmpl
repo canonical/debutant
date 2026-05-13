@@ -1,0 +1,9 @@
+version=4
+{{#has_signing_key}}
+opts=pgpmode=auto \
+{{/has_signing_key}}
+{{^has_signing_key}}
+opts=pgpmode=none \
+{{/has_signing_key}}
+{{watch_url}} \
+  {{watch_filenameregex}}

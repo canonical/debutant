@@ -1,0 +1,25 @@
+Source: {{source}}
+Section: {{section}}
+Priority: {{priority}}
+Maintainer: {{debfullname}} <{{debemail}}>
+Build-Depends:
+ debhelper-compat (= 13),
+{{#build_deps}}
+ {{name}}{{#version}} ({{version}}){{/version}},
+{{/build_deps}}
+Standards-Version: 4.7.1
+Homepage: {{homepage}}
+Vcs-Browser: {{vcs_browser}}
+Vcs-Git: {{vcs_git}}
+Rules-Requires-Root: no
+
+Package: {{binary}}
+Architecture: {{architecture}}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: {{short_description}}
+ <INSERT LONG DESCRIPTION HERE>
+ .
+ Replace this paragraph with one or more paragraphs describing the
+ package. Each paragraph is separated by a line containing only " .".

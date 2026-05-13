@@ -1,0 +1,41 @@
+#!/bin/bash
+# tooling-probe.sh — emit JSON describing packaging tooling availability.
+#
+# Usage: tooling-probe.sh
+#
+# Output: a single JSON object on stdout matching shared-context.md's
+# "tooling" sub-object.
+
+set -euo pipefail
+
+probe() {
+  local cmd="$1"
+  local version_flag="${2:---version}"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    local v
+    v="$("$cmd" "$version_flag" 2>&1 | head -n1 | sed -E 's/[^0-9.]*([0-9]+(\.[0-9]+){1,3}).*/\1/' || true)"
+    if [[ -z "$v" || "$v" == *" "* ]]; then v="unknown"; fi
+    printf '{"available": true, "version": "%s"}' "$v"
+  else
+    printf '{"available": false, "version": null}'
+  fi
+}
+
+cat <<EOF
+{
+  "sbuild":        $(probe sbuild),
+  "pbuilder":      $(probe pbuilder),
+  "autopkgtest":   $(probe autopkgtest),
+  "lintian":       $(probe lintian),
+  "debputy":       $(probe debputy),
+  "wrap-and-sort": $(probe wrap-and-sort),
+  "gbp":           $(probe gbp),
+  "dh_make":       $(probe dh_make),
+  "cme":           $(probe cme),
+  "blhc":          $(probe blhc),
+  "hardening-check": $(probe hardening-check),
+  "licensecheck":  $(probe licensecheck),
+  "uscan":         $(probe uscan),
+  "dch":           $(probe dch)
+}
+EOF
