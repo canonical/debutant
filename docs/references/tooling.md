@@ -12,6 +12,31 @@ Newer declarative packaging helper, complementary to debhelper.
 - Not a replacement for debhelper yet; workers use it as a
   *cheap check* in the tiered-verification path.
 
+## decopy
+
+Automatic `debian/copyright` generator.
+
+- `decopy` — scans the source tree for licenses and copyright
+  notices, then writes (or updates) `debian/copyright` in DEP-5
+  format.
+- Re-parses an existing `debian/copyright` to produce a more
+  complete output.
+- Useful when bootstrapping or after a large upstream refresh
+  that changes licence headers.
+
+## lrc
+
+`lrc` (from the `licenserecon` package) cross-checks `debian/copyright` against
+`licensecheck` output.
+
+- `lrc` — runs `licensecheck` on the source tree and compares
+  each file's detected licence with the DEP-5
+  `debian/copyright`; reports mismatches.
+- Catches drift between actual file licences and the declared
+  copyright file.
+- Workers SHOULD run `lrc` after any refresh that touches
+  `debian/copyright`.
+
 ## wrap-and-sort
 
 Canonicalises whitespace and sorting in `debian/control`,
