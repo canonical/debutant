@@ -43,6 +43,8 @@ cat <<EOF
   "blhc":               $(probe blhc),
   "hardening-check":    $(probe hardening-check),
   "licensecheck":       $(probe licensecheck),
+  "decopy":             $(probe decopy),
+  "lrc":                $(probe lrc),
   "uscan":              $(probe uscan),
   "dch":                $(probe dch),
   "jq":                 $(probe jq),
