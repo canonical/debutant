@@ -64,6 +64,31 @@ The templates use Mustache-style `{{var}}` and section
 You substitute by string-matching — there is no separate render
 engine. Compute each flag once at the start of the render step.
 
+### Language dispatch
+
+`rules.tmpl` is the generic `dh $@` fallback. When `source.language`
+matches a language with a dedicated template, the renderer picks the
+language-specific variant instead:
+
+| `source.language` | Template selected |
+|---|---|
+| `python` | `rules.python.tmpl` |
+| `rust` (application binary) | `rules.rust.tmpl` |
+| `go` | `rules.golang.tmpl` |
+| `perl` | `rules.perl.tmpl` |
+| anything else | `rules.tmpl` |
+
+The language-specific templates live alongside `rules.tmpl` in
+`${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/templates/` and inherit the
+flags below. They land in later commits as each language overlay is
+written; until a given template exists the dispatch falls back to
+`rules.tmpl` for that language. The matching reference doc, when it
+exists, lives at `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/<lang>.md`
+and the build-deps discovery step (process step 4) links into it.
+
+Rust library crates do not go through this dispatch at all — see
+"Bail-out conditions" below.
+
 ### Boolean flags
 
 | Flag | True when | Notes |
@@ -86,6 +111,7 @@ Pulled from context unless noted:
 | `packaging_year` | `date +%Y` at render time. |
 | `pristine_tar` | `True` or `False` — `False` for a fresh bootstrap unless the maintainer asks for pristine-tar. |
 | `template_name`, `template_specific_flags`, `watch_source_fields` | See watch v5 reference for the field set. |
+| `language` | `source.language` from `${DEBUTANT_CONTEXT}` / `./.debutant/context.json`. Drives the template dispatch above. |
 
 ### List flags
 
@@ -182,6 +208,10 @@ Phase-specific (bootstrap):
 - Build system is unsupported (no `dh-sequence-*` for it).
 - First build fails AND you cannot identify a recovery path
   within budget.
+- Source is a Rust **library crate** (Cargo manifest has `[lib]`
+  and no `[[bin]]`). Bootstrap should hand off to `debcargo`,
+  which manages its own packaging layout, rather than render a
+  fresh `debian/` from templates.
 
 Use the bail-out summary format from
 `${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "Bail-out summary
