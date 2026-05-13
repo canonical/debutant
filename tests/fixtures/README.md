@@ -8,6 +8,15 @@ This directory serves two purposes simultaneously:
    fixtures that have one) as idiom examples — see
    `skills/debutant/shared-context.md` § "Reference-corpus contract".
 
+The fixture driver lives one level up at `tests/run-fixtures.sh`.
+It walks each fixture, runs `<fixture>/test.sh` if executable, and
+reports `[PASS]`/`[FAIL]`/`[STUB]` per fixture. Pass `--strict` to
+fail when stubs remain.
+
+Not to be confused with `skills/debutant/scripts/verify.sh`, which
+is the build+lintian snapshot tool that worker skills call between
+iteration attempts — see `skills/debutant/shared-context.md`.
+
 ## Fixtures (planned)
 
 | Fixture | Upstream shape | Workers exercised |

@@ -65,6 +65,65 @@ Workers MUST:
 }
 ```
 
+## Verify-script output schema (v1)
+
+`skills/debutant/scripts/verify.sh` is the iteration-loop primitive
+workers consult between fix attempts. It runs a build (sbuild or
+dpkg-buildpackage) and lintian, then emits a single JSON snapshot.
+The script is **stateless**: workers hold previous snapshots in
+context and compute progress (e.g. "same tag fired last attempt")
+themselves.
+
+Exit code is 0 on a successful snapshot regardless of build/lint
+pass-or-fail. Non-zero only on input errors (missing `debian/`,
+missing `jq`, bad args).
+
+```json
+{
+  "build": {
+    "tool":      "sbuild|dpkg-buildpackage|none",
+    "ran":       true,
+    "ok":        true,
+    "log_path":  "/tmp/verify-build.XXXXXX.log",
+    "exit_code": 0
+  },
+  "lintian": {
+    "ran":               true,
+    "scope":             "changes|dsc|source-tree|none",
+    "log_path":          "/tmp/verify-lintian.XXXXXX.log",
+    "errors":            ["tag-name", "..."],
+    "warnings":          ["tag-name", "..."],
+    "infos":             ["tag-name", "..."],
+    "pedantics":         ["tag-name", "..."],
+    "overrides_applied": 0
+  },
+  "diff_size_lines": 0
+}
+```
+
+Field notes for workers:
+
+- **`build.ran == false`** means no builder executed (either
+  `--no-build` was passed or no builder was available). `build.ok`
+  is meaningful only when `ran == true`.
+- **`lintian.scope`** records what artifact lintian inspected.
+  `changes` is authoritative; `dsc` covers source-level tags only;
+  **`source-tree` is a degraded scope** — binary-only checks
+  (file-permissions, shipped files, etc.) do not fire. Workers
+  MUST weight a clean result less when `scope == "source-tree"`.
+- **Tag arrays** may contain duplicates when a tag fires on more
+  than one file. The repetition is signal — workers MAY use it to
+  prioritise fixes that resolve many instances at once.
+- **`overrides_applied`** counts `N: Overridden:` lines in the
+  lintian log — it tells the worker how many tags are already
+  suppressed by existing overrides, so it doesn't double-override.
+- **`diff_size_lines`** counts changed lines under `debian/` only
+  (relative to the git index), so upstream churn doesn't pollute
+  the budget check. `null` if the source tree is not a git repo.
+- **Log paths** point at `/tmp` files that persist for the
+  session. Workers MAY `Read` them for context (e.g. lintian
+  `--info` text on a specific tag) but MUST NOT mutate them.
+
 ## Iteration-budget envelope
 
 All workers that mutate the source tree MUST honour:
