@@ -89,7 +89,7 @@ enables the relevant generic flag (`--watch-v5`, `--dh-sequence`,
 etc.) — they do not introduce new flags.
 
 - **Python**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Common refresh checks". Surface: missing `dh-sequence-python3`, legacy `X-Python-Version` cruft, `debian/watch` not on v5 + `Template: pypi`, missing `Testsuite: autopkgtest-pkg-python` on library packages, Python 2 build-dep residue (`python`, `python-dev`, `python-minimal`), missing `${python3:Depends}` substvar in binary stanzas.
-- **Rust**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` lands.
+- **Rust**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` § "Common refresh checks". Application binaries: `dh-cargo`, `cargo`, `rustc` present in `Build-Depends`; `--buildsystem=cargo` (not legacy `--with cargo`); hardening flags on. Library crates: surface as a finding and recommend the debcargo workflow rather than refreshing a hand-written `debian/`.
 - **Go**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` lands.
 - **Perl**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` lands.
 

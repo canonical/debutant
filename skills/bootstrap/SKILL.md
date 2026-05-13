@@ -158,6 +158,11 @@ and a wrong default ripples into every later run.
    - **Python** (`pyproject.toml` / `setup.py` / `setup.cfg`):
      `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md`
      § "debian/control essentials".
+   - **Rust application binaries** (`Cargo.toml` with `[[bin]]`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md`
+     § "Application binaries → dh-cargo". For Rust **library
+     crates** (`[lib]`, no `[[bin]]`), see the "Rust library
+     crate" entry in § "Bail-out conditions" below.
 5. **Generate `debian/`** from templates + computed values.
 6. **`wrap-and-sort -ast`** on the result.
 7. **First verify.** Call `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`
@@ -218,7 +223,9 @@ Phase-specific (bootstrap):
 - Source is a Rust **library crate** (Cargo manifest has `[lib]`
   and no `[[bin]]`). Bootstrap should hand off to `debcargo`,
   which manages its own packaging layout, rather than render a
-  fresh `debian/` from templates.
+  fresh `debian/` from templates. See
+  `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md`
+  § "Library crates → debcargo" for the recommended workflow.
 
 Use the bail-out summary format from
 `${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "Bail-out summary
