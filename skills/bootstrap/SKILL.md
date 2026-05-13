@@ -45,7 +45,7 @@ A minimal but complete `debian/` directory with:
   Build-Depends instead of `--with`.
 - `debian/source/format` — `3.0 (quilt)` (or `3.0 (native)` only
   if `source.upstream_vcs == none` AND version has no `-` revision).
-- `debian/watch` — version 4. `pgpmode=auto` only if
+- `debian/watch` — version 5. `pgpmode=auto` only if
   `debian/upstream/signing-key.asc` exists; otherwise `pgpmode=none`.
   For git-only upstreams, use `mode=git`.
 - `debian/salsa-ci.yml` — include the pinned template version from

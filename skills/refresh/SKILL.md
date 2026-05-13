@@ -1,6 +1,6 @@
 ---
 name: refresh
-description: Modernise an existing debian/ directory to current house style — compat bump, Standards-Version, R³, dh-sequence migration, wrap-and-sort, watch v4, DEP-5 normalisation, M-A audit, Salsa-CI. Default dry-run. The most dangerous worker; treat the maintainer's prior choices with respect.
+description: Modernise an existing debian/ directory to current house style — compat bump, Standards-Version, R³, dh-sequence migration, wrap-and-sort, watch v5, DEP-5 normalisation, M-A audit, Salsa-CI. Default dry-run. The most dangerous worker; treat the maintainer's prior choices with respect.
 ---
 
 # debutant:refresh
@@ -69,7 +69,8 @@ changes. Flags:
 - `--dh-sequence` — convert `dh $@ --with foo` to
   `dh-sequence-foo` Build-Depends.
 - `--wrap-and-sort` — run `wrap-and-sort -ast`.
-- `--watch-v5` — upgrade `debian/watch` to v5 syntax.
+- `--watch-v5` — upgrade `debian/watch` to v5 syntax from any
+  prior version (v3, v4). v5 is the only supported target.
 - `--dep5` — normalise `debian/copyright` to DEP-5.
 - `--m-a-audit` — produce an advisory report on `Multi-Arch:`
   candidates; never writes.
@@ -88,7 +89,7 @@ changes. Flags:
    rrr:              present but not needed        [eligible]
    dh-sequence:      uses --with python3,golang    [eligible]
    wrap-and-sort:    unsorted Build-Depends        [eligible]
-   watch:            v4                            [eligible]
+   watch:            current=v4, target=v5         [eligible]
    dep5:             freeform                      [eligible]
    m-a:              no annotations                [advisory]
    salsa-ci:         absent                        [eligible]

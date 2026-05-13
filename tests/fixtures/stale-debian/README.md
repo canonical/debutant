@@ -9,7 +9,7 @@ Stale features to include:
 - `Standards-Version: 4.3.0` (old).
 - No `Rules-Requires-Root`.
 - `dh $@ --with python3` instead of `dh-sequence-python3`.
-- `debian/watch` v3.
+- `debian/watch` v3 (to exercise the v3→v5 upgrade path).
 - Unsorted `Build-Depends`.
 - Freeform `debian/copyright` (not DEP-5).
 - No `debian/salsa-ci.yml`.
