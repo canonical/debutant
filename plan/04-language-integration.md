@@ -109,53 +109,82 @@ consider the shortcut first.
   filled in. (Autopkgtest unchanged — the "no autodep8 for
   Rust" line landed in commit 4.)
 
-### 🔲 Commit 7 — `golang: language overlay, rules template, worker wiring`
-**Not started.** Per plan: ship
-`docs/references/languages/golang.md` (dh-golang, vendor
-decisions, `0.0~git<date>.<hash>-1` versioning, github watch
-template, multi-arch placement, `DH_GOLANG_INSTALL_EXTRA`) and
-`skills/bootstrap/templates/rules.golang.tmpl` (`dh $@
---buildsystem=golang --with=golang`); fill in the Go anchors in
-bootstrap/refresh; autopkgtest already states no Go autodep8.
+### ✅ Commit 7 — `golang: language overlay, rules template, worker wiring`
+**Done.** Files:
+- `docs/references/languages/golang.md` — library-vs-application
+  shape decision; `dh-make-golang` as comparison-run-only;
+  package naming (`golang-<importpath>-dev` for libs, command
+  name for binaries); install paths under
+  `/usr/share/gocode/src/`; `dh-sequence-golang` + `golang-any`
+  Build-Depends; `XS-Go-Import-Path:` source-stanza field;
+  `Built-Using: ${misc:Built-Using}` for application binaries;
+  `DH_GOLANG_INSTALL_EXTRA` / `DH_GOLANG_EXCLUDES` overrides;
+  `0.0~git<date>.<hash>-1` versioning for HEAD-only upstreams;
+  watch v5 + `Template: github`; no autodep8; refresh checks;
+  bail-outs. Has a "Notes for Golang package maintainer"
+  section flagging open accuracy questions for review.
+- `skills/bootstrap/templates/rules.golang.tmpl` — minimal
+  `dh $@ --buildsystem=golang` (modern dh-sequence form, no
+  `--with=golang`; plan deviation, documented in commit
+  message context).
+- Worker SKILL.md edits: bootstrap Process step 4 anchor;
+  refresh Go stub filled in. (Autopkgtest unchanged — the "no
+  autodep8 for Go" line landed in commit 4.)
 
-### 🔲 Commit 8 — `perl: drafted overlay, rules template, worker wiring`
-**Not started.** Per plan: draft
-`docs/references/languages/perl.md` from public Debian Perl
-Group knowledge (with a DRAFT marker awaiting pkg-perl review)
-covering package naming (`libfoo-bar-perl`), architecture
-choice, dh-make-perl as a comparison run in `/tmp` only, build
-deps (`libmodule-build-tiny-perl`, test libs), file layout
-(`/usr/share/perl5/`), watch v5 + `Template: metacpan`,
-autopkgtest-pkg-perl autodep8. Ship
-`skills/bootstrap/templates/rules.perl.tmpl` (minimal `dh $@`).
-Fill in Perl anchors in bootstrap / refresh / autopkgtest. No
-new fixture in this commit (deferred to the fixture-promotion
-pass; see "Decisions" §6).
+### ✅ Commit 8 — `perl: drafted overlay, rules template, worker wiring`
+**Done.** Files:
+- `docs/references/languages/perl.md` — drafted from public
+  Debian Perl Group knowledge with a prominent DRAFT
+  blockquote at the top and a "DRAFT marker — likely needs
+  correction" section at the bottom listing specific
+  scrutiny points (test-dep selection, dh-sequence-perl
+  existence, pkg-perl workflow, XS Build-Depends, hardening
+  for XS). Covers library-vs-application split, naming
+  (`libfoo-bar-perl`), file layout, plain `dh $@` rules with
+  XS-hardening note, watch v5 + `Template: metacpan`,
+  autodep8 `Testsuite: autopkgtest-pkg-perl`, refresh checks,
+  bail-outs.
+- `skills/bootstrap/templates/rules.perl.tmpl` — 4-line
+  `dh $@` (no hardening gate; overlay explains XS modules
+  need it added by hand).
+- Worker SKILL.md edits: bootstrap Process step 4 anchor
+  with explicit "DRAFT pending pkg-perl review" note;
+  refresh + autopkgtest Perl stubs filled in (DRAFT caveat
+  carried through).
 
-### 🔲 Commit 9 — `developer: document language-overlay recipe`
-**Not started.** Add an "Adding a language overlay" § to
-`docs/developer.md` walking through the recipe used in commits
-5–8, referencing the four shipped overlays as worked examples.
+### ✅ Commit 9 — `developer: document language-overlay recipe`
+**Done.** New `## Adding a language overlay` section in
+`docs/developer.md` inserted between "Adding a reference doc"
+and "Quarterly review checklist". Covers: when to add an
+overlay; the three concerns (doc + template + worker
+anchors); 8-step recipe; the three house-style traps
+(watch v5 only, no `dh_make`-style output shipped,
+sbuild-first verification); DRAFT marker convention with
+`perl.md` as the worked example; worked-examples table
+listing all four shipped overlays.
 
-### 🔲 Commit 10 — `house-style: add language-overlay drift to quarterly review`
-**Not started.** Extend the quarterly-review checklist in
-`docs/house-style.md` with per-language drift items: pybuild
-major version, dh-golang major version, debcargo workflow
-changes, perl version transitions. One bullet per language.
+### ✅ Commit 10 — `house-style: add language-overlay drift to quarterly checklist`
+**Done.** New bullet in `docs/house-style.md` § "Notes for
+future-me", listing per-language drift hot-spots: pybuild
+major version + `dh-sequence-python3` behaviour (Python);
+dh-cargo / debcargo workflow (Rust); dh-golang major version
++ `XS-Go-Import-Path:` conventions (Go); perl transitions +
+pkg-perl conventions + DRAFT-marker status (Perl).
 
-### 🔲 Commit 11 — `version: bump to 0.2.0, surface overlays in README`
-**Not started.** Bump `.claude-plugin/plugin.json` to 0.2.0;
-update `README.md` coverage summary to list the four language
-overlays + the bootstrap template variants.
+### ✅ Commit 11 — `version: bump to 0.2.0, surface language overlays in README`
+**Done.** Files:
+- `.claude-plugin/plugin.json` — version `0.1.0` → `0.2.0`.
+- `README.md` — Status section reworded (mentions language
+  overlays shipped in 0.2.0; references
+  `plan/04-language-integration.md`); new
+  `## Language coverage` section between Status and Layout
+  with one bullet per language; Layout tree updated with
+  `references/languages/` subdir.
 
-## Where we paused
+## Status: complete
 
-End of commit 6. Resume by starting commit 7 (Go overlay).
-
-The user-side workflow is one commit at a time: tool shows the
-diff, user reviews and commits, then says "next" / "done" to
-move on. No tool commit was made by the agent. Plan and progress
-both live in this file from now on.
+All eleven commits landed. The language-overlay pass is
+shipped in `debutant` 0.2.0.
 
 ## Resume notes
 

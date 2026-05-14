@@ -88,6 +88,142 @@ Reference docs live under `docs/references/`. Keep them:
   devref, DEP, upstream manpage).
 - **Dated.** Add `**Last reviewed**: YYYY-MM-DD` at the top.
 
+## Adding a language overlay
+
+Language overlays specialise the workers' output by detected
+`source.language`. The four shipped overlays (Python, Rust, Go,
+Perl) are the canonical examples; follow their shape when
+adding a new one.
+
+### When to add an overlay
+
+Add an overlay when both of these hold:
+
+- The target language has Debian-specific packaging conventions
+  the workers would otherwise get wrong (a build helper like
+  `dh-cargo` / `pybuild`, a watch template, an autodep8
+  generator, a refresh-time cruft pattern).
+- The language is established enough in Debian that multiple
+  users of debutant are likely to package in it.
+
+### Files an overlay touches
+
+A complete language overlay is three concerns:
+
+```
+docs/references/languages/<lang>.md          # the overlay doc
+skills/bootstrap/templates/rules.<lang>.tmpl # rules variant
+skills/{bootstrap,refresh,autopkgtest}/SKILL.md   # anchor edits
+```
+
+The rules template can be near-empty for languages whose dh
+setup is just `dh $@` (see `rules.perl.tmpl`). For languages
+with build-system flags or required env vars, copy the shape
+of `rules.python.tmpl`.
+
+### Recipe
+
+1. **Pick a language code.** This is the value `source.language`
+   will hold. The current enum lives in
+   `${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "JSON schema
+   (v1)". If your language is not in that enum, extend it
+   first.
+
+2. **Write the overlay doc.** Create
+   `docs/references/languages/<lang>.md`. Follow the shape of
+   the existing overlays — at minimum these sections:
+
+   - `# <Language> — debutant overlay` + a short intro pointing
+     back to `house-style.md`.
+   - Authoritative upstream sources (Debian policy / team /
+     manpages).
+   - `## When this overlay applies` — what triggers
+     `source.language == "<lang>"` detection.
+   - `## Library packages vs. application binaries` if the
+     language has both shapes.
+   - `## Initial packaging (comparison run only)` if a
+     `dh-make-*` tool exists.
+   - `## Package naming` — explicit naming conventions.
+   - `## File layout` — install paths.
+   - `## debian/control essentials` — Build-Depends template
+     and binary stanza examples.
+   - `## debian/rules` — exact contents of the corresponding
+     `rules.<lang>.tmpl` plus common overrides.
+   - `## debian/watch (v5 with <template>)` — the right v5
+     template if one exists.
+   - `## autopkgtest` — autodep8 shortcut if a generator exists,
+     otherwise an explicit "no autodep8" statement.
+   - `## Common refresh checks` — the per-language items the
+     refresh worker should surface.
+   - `## Bail-out conditions` — language-specific bail-outs in
+     addition to the worker-level ones.
+
+3. **Align to debutant house style.** Three frequent traps:
+   - **Watch v5 only.** Never recommend v3 or v4 watch syntax.
+   - **No `dh_make`-style output shipped.** `dh-make-perl`,
+     `dh-make-golang`, `py2dsc`, etc. are comparison runs in
+     `/tmp`, not the source of truth.
+   - **sbuild-first verification.** Refer to
+     `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`, not
+     `dpkg-buildpackage -us -uc`, as the primary check.
+
+4. **Add the rules template.** Create
+   `skills/bootstrap/templates/rules.<lang>.tmpl`. Gate
+   hardening with `{{#has_compiled_binaries}}…{{/has_compiled_binaries}}`
+   when the language produces native object code. The
+   dispatch table in `skills/bootstrap/SKILL.md` § "Language
+   dispatch" must list this template.
+
+5. **Wire bootstrap.** Edit `skills/bootstrap/SKILL.md`:
+   - Confirm (or add) the row in § "Language dispatch".
+   - Add a bullet under Process step 4 "Build-deps discovery"
+     pointing at the new overlay's
+     `## debian/control essentials` section.
+   - If the template needs a scalar (e.g. `pybuild_name` for
+     Python), add it to the Scalar values table.
+
+6. **Wire refresh.** Edit `skills/refresh/SKILL.md`: replace
+   the language's TBD stub in § "Language-aware audit" with a
+   short summary of the checks, linking back to the overlay's
+   `## Common refresh checks` section.
+
+7. **Wire autopkgtest.** Edit `skills/autopkgtest/SKILL.md`:
+   - If the language has an autodep8 generator, update the
+     "Notes" cell in the autodep8 shortcut table.
+   - If no generator exists, extend the explicit
+     "No autodep8 generator exists for …" line that currently
+     covers Rust and Go.
+
+8. **No fixture work in the overlay commit.** Fixture
+   promotion is handled in a separate pass — see
+   `tests/fixtures/README.md`. Shipping overlay text and a
+   template does not require touching `tests/`.
+
+### DRAFT marker convention
+
+If you draft an overlay without input from a maintainer who
+actively packages in that language, mark it DRAFT:
+
+- Add a `> **⚠️ DRAFT.** …` blockquote at the top of the file
+  with a one-line description of the review needed.
+- Add a `## DRAFT marker — likely needs correction` section at
+  the end listing the bits most likely to be wrong or
+  outdated.
+- Carry the DRAFT caveat through to the refresh and autopkgtest
+  worker references (e.g. "see `<lang>.md` (DRAFT pending …
+  review)").
+
+`docs/references/languages/perl.md` is the worked example.
+
+### Worked examples
+
+| Language | Overlay | Rules template | Notes |
+|---|---|---|---|
+| Python | `docs/references/languages/python.md` | `rules.python.tmpl` | `--buildsystem=pybuild` + `pybuild_name` scalar; autodep8 `autopkgtest-pkg-python`. |
+| Rust | `docs/references/languages/rust.md` | `rules.rust.tmpl` | dh-cargo for application binaries; debcargo bail-out for library crates; no autodep8. |
+| Go | `docs/references/languages/golang.md` | `rules.golang.tmpl` | `--buildsystem=golang` + `XS-Go-Import-Path:` source-stanza field; no autodep8. |
+| Perl | `docs/references/languages/perl.md` | `rules.perl.tmpl` | Plain `dh $@`; autodep8 `autopkgtest-pkg-perl`; DRAFT pending pkg-perl review. |
+
 ## Quarterly review checklist
 
 The house style and references go stale. Quarterly, check:
@@ -107,12 +243,12 @@ The house style and references go stale. Quarterly, check:
 `docs/house-style.md` AND duplicated in
 `skills/bootstrap/templates/`. They must move together:
 
-| Value | Files |
-|---|---|
-| `debhelper-compat` version | `docs/house-style.md` (debhelper §) + `skills/bootstrap/templates/control.tmpl` |
-| `Standards-Version` | `docs/house-style.md` (Control fields §) + `skills/bootstrap/templates/control.tmpl` |
-| Salsa-CI pinned ref | `docs/references/salsa-ci.md` + `skills/bootstrap/templates/salsa-ci.yml.tmpl` |
-| Watch syntax version | `docs/house-style.md` (debian/watch §) + `skills/bootstrap/templates/watch.tmpl` |
+| Value                      | Files                                                                                |
+|----------------------------|--------------------------------------------------------------------------------------|
+| `debhelper-compat` version | `docs/house-style.md` (debhelper §) + `skills/bootstrap/templates/control.tmpl`      |
+| `Standards-Version`        | `docs/house-style.md` (Control fields §) + `skills/bootstrap/templates/control.tmpl` |
+| Salsa-CI pinned ref        | `docs/references/salsa-ci.md` + `skills/bootstrap/templates/salsa-ci.yml.tmpl`       |
+| Watch syntax version       | `docs/house-style.md` (debian/watch §) + `skills/bootstrap/templates/watch.tmpl`     |
 
 `debian/control` has no comment syntax, so no inline reminder
 lives in the template — the discipline is here.

@@ -278,6 +278,15 @@ top of the Debian-first rules above. See
 
 - Re-check Standards-Version, debhelper-compat default, and
   Salsa-CI template version at every quarterly review.
+- Re-check language-overlay drift hot-spots: pybuild major
+  version and `dh-sequence-python3` behaviour
+  (`docs/references/languages/python.md`); dh-cargo /
+  debcargo workflow changes
+  (`docs/references/languages/rust.md`); dh-golang major
+  version and `XS-Go-Import-Path:` conventions
+  (`docs/references/languages/golang.md`); perl version
+  transitions, pkg-perl conventions, and the DRAFT marker
+  status (`docs/references/languages/perl.md`).
 - Re-read `/usr/share/doc/debian-policy/upgrading-checklist.txt.gz`
   at every quarterly review and update the citations above.
 - New DEPs accepted between reviews: add to this file before

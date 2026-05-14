@@ -90,8 +90,8 @@ etc.) — they do not introduce new flags.
 
 - **Python**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Common refresh checks". Surface: missing `dh-sequence-python3`, legacy `X-Python-Version` cruft, `debian/watch` not on v5 + `Template: pypi`, missing `Testsuite: autopkgtest-pkg-python` on library packages, Python 2 build-dep residue (`python`, `python-dev`, `python-minimal`), missing `${python3:Depends}` substvar in binary stanzas.
 - **Rust**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` § "Common refresh checks". Application binaries: `dh-cargo`, `cargo`, `rustc` present in `Build-Depends`; `--buildsystem=cargo` (not legacy `--with cargo`); hardening flags on. Library crates: surface as a finding and recommend the debcargo workflow rather than refreshing a hand-written `debian/`.
-- **Go**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` lands.
-- **Perl**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` lands.
+- **Go**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` § "Common refresh checks". Surface: missing `dh-sequence-golang` (or legacy `dh-golang` + `--with golang`), missing `golang-any`, missing `XS-Go-Import-Path:` in the source stanza, missing `--buildsystem=golang` in `debian/rules`, missing `Built-Using: ${misc:Built-Using}` on application binary stanzas, `debian/watch` not on v5 + `Template: github`/`gitlab`, unstripped `vendor/` directory.
+- **Perl**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` § "Common refresh checks" (note: that file is DRAFT pending pkg-perl review). Surface: `debhelper-compat (= 13)` + `perl` in `Build-Depends`, no legacy `${perl:Provides}`, `${perl:Depends}` substvar in binary stanzas (`${shlibs:Depends}` for XS), `Section: perl` on library binaries, `debian/watch` not on v5 + `Template: metacpan`, missing `Testsuite: autopkgtest-pkg-perl` on libraries without a hand-rolled `debian/tests/`, `Architecture` matches XS-vs-pure-Perl reality.
 
 When `source.language` is not in this list, no language-aware
 checks fire and the audit is purely flag-driven.
