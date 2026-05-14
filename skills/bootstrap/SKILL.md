@@ -163,6 +163,11 @@ and a wrong default ripples into every later run.
      § "Application binaries → dh-cargo". For Rust **library
      crates** (`[lib]`, no `[[bin]]`), see the "Rust library
      crate" entry in § "Bail-out conditions" below.
+   - **Go** (`go.mod`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md`
+     § "debian/control essentials". Library vs application
+     shape is decided per § "Library packages vs. application
+     binaries".
 5. **Generate `debian/`** from templates + computed values.
 6. **`wrap-and-sort -ast`** on the result.
 7. **First verify.** Call `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`
