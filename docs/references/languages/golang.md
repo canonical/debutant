@@ -221,3 +221,13 @@ In addition to the worker-level bail-outs:
   `XS-Go-Import-Path`.
 - Upstream relies on cgo for a C library not in Debian —
   bail with the C-library list.
+
+## Notes for Golang package maintainer (not to be used by the LLM)
+
+- Check XS-Go-Import-Path field name (this is the dh-golang convention I'm
+  aware of, but the field name has had variations).
+- Check /usr/share/gocode/src/<importpath>/ install path (so far it's the
+  standard)
+- Built-Using: ${misc:Built-Using} recommendation (still standard for Go
+  application binaries last I knew).
+- dh-sequence-golang virtual provided by dh-golang (vs. a standalone package?).
