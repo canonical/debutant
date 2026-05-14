@@ -168,6 +168,11 @@ and a wrong default ripples into every later run.
      § "debian/control essentials". Library vs application
      shape is decided per § "Library packages vs. application
      binaries".
+   - **Perl** (`Makefile.PL` / `Build.PL` / `META.json` /
+     `META.yml`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md`
+     § "debian/control essentials". Note that file is marked
+     DRAFT pending pkg-perl maintainer review.
 5. **Generate `debian/`** from templates + computed values.
 6. **`wrap-and-sort -ast`** on the result.
 7. **First verify.** Call `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`
