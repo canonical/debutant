@@ -56,16 +56,47 @@ Start with the *minimum* that makes the test pass:
 **`isolation-container` and `needs-root` require maintainer
 approval.** Do not enable them silently.
 
+## Autodep8 shortcuts
+
+For some upstream ecosystems, the `autodep8` framework generates
+`debian/tests/control` automatically from a single `Testsuite:`
+line in `debian/control`. When the language matches one of the
+generators below, **prefer the autodep8 shortcut over hand-rolling
+`debian/tests/control`** — fewer lines to maintain, and the
+generator tracks ecosystem conventions you would otherwise have
+to encode by hand.
+
+| `source.language` | `Testsuite:` value | Notes |
+|---|---|---|
+| `python` | `autopkgtest-pkg-python` | Generates `python3 -c "import <name>"` per `python3-*` binary; the import name is derived from the package suffix. Set `X-Python3-Module:` when it diverges. See `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "autopkgtest". |
+| `perl` | `autopkgtest-pkg-perl` | TBD — language overlay (`docs/references/languages/perl.md`) covers XS-vs-pure-Perl test deps. |
+| `ruby` | `autopkgtest-pkg-ruby` | Ruby overlay deferred; the generator works without an overlay. |
+| `nodejs` | `autopkgtest-pkg-nodejs` | No overlay planned in this pass; the generator works without one. |
+
+**No autodep8 generator exists for Rust or Go.** Application
+binaries in those languages still go through the full Process
+below; do not propose a `Testsuite:` line for them.
+
+Use the shortcut only when the upstream test suite is structured
+in the way the generator expects (run on the installed package,
+no unusual fixtures, no network). If the package has non-default
+test requirements (custom env vars, non-standard test entry
+points, mocked services), hand-roll instead and link to the
+relevant `languages/<lang>.md` for ecosystem nuances.
+
 ## Process
 
 1. **Load context.**
 2. **Inspect package shape.** Read `debian/control`, the
    filesystem contents of the built `.deb` (if available), and
    the upstream test layout (if any). Report shape to maintainer.
-3. **Propose tests.** For each binary package, propose one or
+3. **Propose tests.** If an autodep8 shortcut applies (see §
+   "Autodep8 shortcuts" above), propose the `Testsuite:` line in
+   `debian/control` first and stop here unless the maintainer
+   rejects it. Otherwise, for each binary package, propose one or
    more test cases with their `Test-Command:` or script body.
-   Print the proposal as a draft `debian/tests/control` plus
-   any per-test scripts under `debian/tests/`.
+   Print the proposal as a draft `debian/tests/control` plus any
+   per-test scripts under `debian/tests/`.
 4. **Confirmation gate.** If any restriction beyond the
    minimum-set is required, ASK the maintainer. Same for any
    `Depends:` lines that pull in heavy extras.

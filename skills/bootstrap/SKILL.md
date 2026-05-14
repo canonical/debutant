@@ -45,7 +45,7 @@ A minimal but complete `debian/` directory with:
   Build-Depends instead of `--with`.
 - `debian/source/format` — `3.0 (quilt)` (or `3.0 (native)` only
   if `source.upstream_vcs == none` AND version has no `-` revision).
-- `debian/watch` — version 4. `pgpmode=auto` only if
+- `debian/watch` — version 5. `pgpmode=auto` only if
   `debian/upstream/signing-key.asc` exists; otherwise `pgpmode=none`.
   For git-only upstreams, use `mode=git`.
 - `debian/salsa-ci.yml` — include the pinned template version from
@@ -63,6 +63,31 @@ The templates use Mustache-style `{{var}}` and section
 `{{#flag}}…{{/flag}}` / inverted `{{^flag}}…{{/flag}}` markers.
 You substitute by string-matching — there is no separate render
 engine. Compute each flag once at the start of the render step.
+
+### Language dispatch
+
+`rules.tmpl` is the generic `dh $@` fallback. When `source.language`
+matches a language with a dedicated template, the renderer picks the
+language-specific variant instead:
+
+| `source.language` | Template selected |
+|---|---|
+| `python` | `rules.python.tmpl` |
+| `rust` (application binary) | `rules.rust.tmpl` |
+| `go` | `rules.golang.tmpl` |
+| `perl` | `rules.perl.tmpl` |
+| anything else | `rules.tmpl` |
+
+The language-specific templates live alongside `rules.tmpl` in
+`${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/templates/` and inherit the
+flags below. They land in later commits as each language overlay is
+written; until a given template exists the dispatch falls back to
+`rules.tmpl` for that language. The matching reference doc, when it
+exists, lives at `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/<lang>.md`
+and the build-deps discovery step (process step 4) links into it.
+
+Rust library crates do not go through this dispatch at all — see
+"Bail-out conditions" below.
 
 ### Boolean flags
 
@@ -86,6 +111,8 @@ Pulled from context unless noted:
 | `packaging_year` | `date +%Y` at render time. |
 | `pristine_tar` | `True` or `False` — `False` for a fresh bootstrap unless the maintainer asks for pristine-tar. |
 | `template_name`, `template_specific_flags`, `watch_source_fields` | See watch v5 reference for the field set. |
+| `language` | `source.language` from `${DEBUTANT_CONTEXT}` / `./.debutant/context.json`. Drives the template dispatch above. |
+| `pybuild_name` | Used by `rules.python.tmpl`. The upstream *import* name (what you write in `import …`), not the source-package name. See `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Package naming". |
 
 ### List flags
 
@@ -124,7 +151,18 @@ and a wrong default ripples into every later run.
    (`Cargo.toml`, `go.mod`, `pyproject.toml`, `configure.ac`,
    `CMakeLists.txt`, etc.) and translate to Debian package names
    when known. For unknown mappings, list them in a follow-up
-   block for the maintainer.
+   block for the maintainer. When `source.language` matches a
+   language overlay, consult the overlay for the canonical
+   Build-Depends template:
+
+   - **Python** (`pyproject.toml` / `setup.py` / `setup.cfg`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md`
+     § "debian/control essentials".
+   - **Rust application binaries** (`Cargo.toml` with `[[bin]]`):
+     `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md`
+     § "Application binaries → dh-cargo". For Rust **library
+     crates** (`[lib]`, no `[[bin]]`), see the "Rust library
+     crate" entry in § "Bail-out conditions" below.
 5. **Generate `debian/`** from templates + computed values.
 6. **`wrap-and-sort -ast`** on the result.
 7. **First verify.** Call `${CLAUDE_PLUGIN_ROOT}/scripts/verify.sh`
@@ -182,6 +220,12 @@ Phase-specific (bootstrap):
 - Build system is unsupported (no `dh-sequence-*` for it).
 - First build fails AND you cannot identify a recovery path
   within budget.
+- Source is a Rust **library crate** (Cargo manifest has `[lib]`
+  and no `[[bin]]`). Bootstrap should hand off to `debcargo`,
+  which manages its own packaging layout, rather than render a
+  fresh `debian/` from templates. See
+  `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md`
+  § "Library crates → debcargo" for the recommended workflow.
 
 Use the bail-out summary format from
 `${CLAUDE_PLUGIN_ROOT}/shared-context.md` § "Bail-out summary

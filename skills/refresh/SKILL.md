@@ -1,6 +1,6 @@
 ---
 name: refresh
-description: Modernise an existing debian/ directory to current house style — compat bump, Standards-Version, R³, dh-sequence migration, wrap-and-sort, watch v4, DEP-5 normalisation, M-A audit, Salsa-CI. Default dry-run. The most dangerous worker; treat the maintainer's prior choices with respect.
+description: Modernise an existing debian/ directory to current house style — compat bump, Standards-Version, R³, dh-sequence migration, wrap-and-sort, watch v5, DEP-5 normalisation, M-A audit, Salsa-CI. Default dry-run. The most dangerous worker; treat the maintainer's prior choices with respect.
 ---
 
 # debutant:refresh
@@ -69,7 +69,8 @@ changes. Flags:
 - `--dh-sequence` — convert `dh $@ --with foo` to
   `dh-sequence-foo` Build-Depends.
 - `--wrap-and-sort` — run `wrap-and-sort -ast`.
-- `--watch-v5` — upgrade `debian/watch` to v5 syntax.
+- `--watch-v5` — upgrade `debian/watch` to v5 syntax from any
+  prior version (v3, v4). v5 is the only supported target.
 - `--dep5` — normalise `debian/copyright` to DEP-5.
 - `--m-a-audit` — produce an advisory report on `Multi-Arch:`
   candidates; never writes.
@@ -77,6 +78,23 @@ changes. Flags:
 - `--all` — enable everything above except `--m-a-audit` (which
   is always advisory).
 - `--yes` — skip the confirmation gate before writing.
+
+## Language-aware audit
+
+When `source.language` matches a language with a dedicated overlay,
+the audit phase adds language-specific checks on top of the
+flag-driven ones above. These checks surface in the audit report
+(Process step 1) and only trigger writes when the maintainer
+enables the relevant generic flag (`--watch-v5`, `--dh-sequence`,
+etc.) — they do not introduce new flags.
+
+- **Python**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/python.md` § "Common refresh checks". Surface: missing `dh-sequence-python3`, legacy `X-Python-Version` cruft, `debian/watch` not on v5 + `Template: pypi`, missing `Testsuite: autopkgtest-pkg-python` on library packages, Python 2 build-dep residue (`python`, `python-dev`, `python-minimal`), missing `${python3:Depends}` substvar in binary stanzas.
+- **Rust**: see `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/rust.md` § "Common refresh checks". Application binaries: `dh-cargo`, `cargo`, `rustc` present in `Build-Depends`; `--buildsystem=cargo` (not legacy `--with cargo`); hardening flags on. Library crates: surface as a finding and recommend the debcargo workflow rather than refreshing a hand-written `debian/`.
+- **Go**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/golang.md` lands.
+- **Perl**: TBD — populated when `${CLAUDE_PLUGIN_ROOT}/docs/references/languages/perl.md` lands.
+
+When `source.language` is not in this list, no language-aware
+checks fire and the audit is purely flag-driven.
 
 ## Process
 
@@ -88,7 +106,7 @@ changes. Flags:
    rrr:              present but not needed        [eligible]
    dh-sequence:      uses --with python3,golang    [eligible]
    wrap-and-sort:    unsorted Build-Depends        [eligible]
-   watch:            v4                            [eligible]
+   watch:            current=v4, target=v5         [eligible]
    dep5:             freeform                      [eligible]
    m-a:              no annotations                [advisory]
    salsa-ci:         absent                        [eligible]

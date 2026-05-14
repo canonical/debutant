@@ -117,13 +117,17 @@ maintainer can override the active style by passing
 
 ## debian/watch
 
-- Version 5 syntax. **DD-judgement.**
+- Version 5 syntax is the only supported target. Refresh upgrades
+  any earlier version (v3, v4) directly to v5; there is no
+  intermediate v3→v4 step. **DD-judgement.** See
+  `${CLAUDE_PLUGIN_ROOT}/docs/references/watch-v5.md` for worked
+  examples and the v4→v5 migration table.
 - `Pgp-Mode: auto` (or `mangle`) ONLY when `debian/upstream/signing-key.asc`
   exists. Otherwise `Pgp-Mode: none`.  Workers MUST check for the key before
   enabling signature verification.
 - Use the proper fields depending on the existence of a template for the
   source, ask the developer if needed rather than guessing or parsing manpages.
-- Prefer `git mode` for projects without tarball releases.
+- Prefer `Template: git` for projects without tarball releases.
   **DD-judgement.**
 
 ## debian/source/format and options
